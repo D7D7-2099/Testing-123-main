@@ -42119,18 +42119,31 @@ Z.MacroRecorder = {
 	CurrentSequence = {},
 	IsRunning = false,
 	IsRecording = false,
+	LoopMacro = false,
+	RecordDelays = true,
+	LastActionTime = 0,
+	StatusLabel = nil,
 	UpdateUIList = function() end,
 	PlayMacro = function()
 		if Z.MacroRecorder.IsRunning then return end
 		Z.MacroRecorder.IsRunning = true
 		task.spawn(function()
-			for _, step in ipairs(Z.MacroRecorder.CurrentSequence) do
-				if not Z.MacroRecorder.IsRunning then break end
-				
-				if step.Type == "Action" then
-					local action = step.Action
-					if action == "Delay" then
-						task.wait(tonumber(step.Value) or 1)
+			while Z.MacroRecorder.IsRunning do
+				for i, step in ipairs(Z.MacroRecorder.CurrentSequence) do
+					if not Z.MacroRecorder.IsRunning then break end
+					
+					if Z.MacroRecorder.StatusLabel then
+						Z.MacroRecorder.StatusLabel:SetText("Status: Playing Block #" .. tostring(i) .. " (" .. tostring(step.Action or step.Id or "") .. ")")
+					end
+					
+					if step.Type == "Action" then
+						local action = step.Action
+						if action == "Delay" then
+							local delayTime = tonumber(step.Value) or 1
+							local waitStart = tick()
+							while tick() - waitStart < delayTime and Z.MacroRecorder.IsRunning do
+								task.wait(0.05)
+							end
 					elseif action == "Toggle Fruit Collector" then
 						X.auto_collect_fruit_enabled = not X.auto_collect_fruit_enabled
 					elseif action == "Toggle Seed Placer" then
@@ -42218,6 +42231,14 @@ Z.MacroRecorder = {
 						task.wait(0.05)
 					end
 				end
+				
+				if not Z.MacroRecorder.LoopMacro then
+					break
+				end
+			end
+			
+			if Z.MacroRecorder.StatusLabel then
+				Z.MacroRecorder.StatusLabel:SetText("Status: Idle")
 			end
 			Z.MacroRecorder.IsRunning = false
 		end)
@@ -42236,6 +42257,28 @@ g.MacroRecorderUi = function()
 	
 	local V = G:AddLeftGroupbox("Macro Player", "play-circle")
 	local y = G:AddRightGroupbox("Add Actions", "plus-circle")
+	
+	Z.MacroRecorder.StatusLabel = V:AddLabel("Status: Idle")
+	
+	V:AddToggle("MacroLoopToggle", {
+		Text = "🔁 Loop Macro",
+		Default = false,
+		Tooltip = "Repeats the macro indefinitely",
+		Callback = function(Value)
+			Z.MacroRecorder.LoopMacro = Value
+		end
+	})
+	
+	y:AddToggle("MacroRecordDelays", {
+		Text = "⏱ Record Delays",
+		Default = true,
+		Tooltip = "Automatically record time waited between actions",
+		Callback = function(Value)
+			Z.MacroRecorder.RecordDelays = Value
+		end
+	})
+	
+	y:AddDivider()
 	
 	local SequenceLabel = V:AddLabel("Empty")
 	Z.MacroRecorder.UpdateUIList = function()
@@ -42303,6 +42346,19 @@ g.MacroRecorderUi = function()
 		end
 	})
 	
+	y:AddButton({
+		Text = "↩️ Undo Last Block",
+		Func = function()
+			if #Z.MacroRecorder.CurrentSequence > 0 then
+				table.remove(Z.MacroRecorder.CurrentSequence, #Z.MacroRecorder.CurrentSequence)
+				Z.MacroRecorder.UpdateUIList()
+				g.Notify("Removed last block.", 2)
+			else
+				g.Notify("Sequence is already empty.", 2)
+			end
+		end
+	})
+	
 	y:AddDivider()
 	
 	local RecordBtn
@@ -42316,6 +42372,7 @@ g.MacroRecorderUi = function()
 			Z.MacroRecorder.IsRecording = not Z.MacroRecorder.IsRecording
 			if Z.MacroRecorder.IsRecording then
 				table.clear(Z.MacroRecorder.CurrentSequence)
+				Z.MacroRecorder.LastActionTime = tick()
 				Z.MacroRecorder.UpdateUIList()
 				g.Notify("Recording started. UI changes will be captured.", 3)
 			else
@@ -42490,32 +42547,43 @@ g.InitUi = function()
 	-- Setup Auto Recorder Hooks
 	task.spawn(function()
 		task.wait(1) -- wait for all UI to be properly initialized
+		
+		local function recordAction(actType, actId, actVal)
+			if Z.MacroRecorder.IsRecording and not Z.MacroRecorder.IsRunning then
+				if Z.MacroRecorder.RecordDelays then
+					local currentTime = tick()
+					local delayTime = currentTime - Z.MacroRecorder.LastActionTime
+					if delayTime > 0.1 then
+						table.insert(Z.MacroRecorder.CurrentSequence, {
+							Type = "Action",
+							Action = "Delay",
+							Value = math.floor(delayTime * 10) / 10
+						})
+					end
+					Z.MacroRecorder.LastActionTime = currentTime
+				end
+				
+				table.insert(Z.MacroRecorder.CurrentSequence, {
+					Type = actType,
+					Id = actId,
+					Value = actVal
+				})
+				Z.MacroRecorder.UpdateUIList()
+			end
+		end
+		
 		if G and G.Library then
 			if G.Library.Toggles then
 				for id, toggleObj in pairs(G.Library.Toggles) do
 					toggleObj:OnChanged(function()
-						if Z.MacroRecorder.IsRecording and not Z.MacroRecorder.IsRunning then
-							table.insert(Z.MacroRecorder.CurrentSequence, {
-								Type = "Toggle",
-								Id = id,
-								Value = toggleObj.Value
-							})
-							Z.MacroRecorder.UpdateUIList()
-						end
+						recordAction("Toggle", id, toggleObj.Value)
 					end)
 				end
 			end
 			if G.Library.Options then
 				for id, optionObj in pairs(G.Library.Options) do
 					optionObj:OnChanged(function()
-						if Z.MacroRecorder.IsRecording and not Z.MacroRecorder.IsRunning then
-							table.insert(Z.MacroRecorder.CurrentSequence, {
-								Type = "Option",
-								Id = id,
-								Value = optionObj.Value
-							})
-							Z.MacroRecorder.UpdateUIList()
-						end
+						recordAction("Option", id, optionObj.Value)
 					end)
 				end
 			end
