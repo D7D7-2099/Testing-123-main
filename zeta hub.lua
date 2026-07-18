@@ -42376,13 +42376,89 @@ g.MacroRecorderUi = function()
 			if type(X.macro_recorder_macros) == "table" and X.macro_recorder_macros[MacroNameInput] then
 				local loaded = {}
 				for _, v in ipairs(X.macro_recorder_macros[MacroNameInput]) do
-					table.insert(loaded, {Type = v.Type, Action = v.Action, Value = v.Value})
+					table.insert(loaded, {Type = v.Type, Action = v.Action, Value = v.Value, Id = v.Id})
 				end
 				Z.MacroRecorder.CurrentSequence = loaded
 				Z.MacroRecorder.UpdateUIList()
 				g.Notify("Loaded macro: " .. MacroNameInput, 3)
 			else
 				g.Notify("Macro not found!", 3)
+			end
+		end
+	})
+	
+	saveBox:AddDivider()
+	
+	saveBox:AddButton({
+		Text = "📄 Export to TXT",
+		Func = function()
+			if MacroNameInput == "" then return end
+			local lines = {}
+			for _, v in ipairs(Z.MacroRecorder.CurrentSequence) do
+				if v.Type == "Action" then
+					table.insert(lines, "[Action] " .. tostring(v.Action) .. " = " .. tostring(v.Value or "nil"))
+				elseif v.Type == "Toggle" then
+					table.insert(lines, "[Toggle] " .. tostring(v.Id) .. " = " .. tostring(v.Value))
+				elseif v.Type == "Option" then
+					table.insert(lines, "[Option] " .. tostring(v.Id) .. " = " .. tostring(v.Value))
+				end
+			end
+			local content = table.concat(lines, "\n")
+			local filename = "ZetaHub_Macro_" .. MacroNameInput .. ".txt"
+			if writefile then
+				pcall(function() writefile(filename, content) end)
+				g.Notify("Exported to executor workspace as " .. filename, 4)
+			else
+				g.Notify("Your executor doesn't support writing files.", 3)
+			end
+		end
+	})
+	
+	saveBox:AddButton({
+		Text = "📄 Import from TXT",
+		Func = function()
+			if MacroNameInput == "" then return end
+			local filename = "ZetaHub_Macro_" .. MacroNameInput .. ".txt"
+			if readfile and isfile then
+				if not isfile(filename) then
+					g.Notify("File not found: " .. filename, 3)
+					return
+				end
+				local success, content = pcall(function() return readfile(filename) end)
+				if success and content then
+					local newSequence = {}
+					for line in string.gmatch(content, "[^\r\n]+") do
+						local tType, tRest = string.match(line, "%[([^%]]+)%]%s*(.+)")
+						if tType and tRest then
+							local tId, tVal = string.match(tRest, "(.+)%s*=%s*(.+)")
+							if tId and tVal then
+								tId = tId:match("^%s*(.-)%s*$") -- trim
+								tVal = tVal:match("^%s*(.-)%s*$")
+								
+								local finalVal = tVal
+								if finalVal == "true" then finalVal = true
+								elseif finalVal == "false" then finalVal = false
+								elseif tonumber(finalVal) then finalVal = tonumber(finalVal)
+								elseif finalVal == "nil" then finalVal = nil end
+								
+								if tType == "Action" then
+									table.insert(newSequence, { Type = "Action", Action = tId, Value = finalVal })
+								elseif tType == "Toggle" then
+									table.insert(newSequence, { Type = "Toggle", Id = tId, Value = finalVal })
+								elseif tType == "Option" then
+									table.insert(newSequence, { Type = "Option", Id = tId, Value = finalVal })
+								end
+							end
+						end
+					end
+					Z.MacroRecorder.CurrentSequence = newSequence
+					Z.MacroRecorder.UpdateUIList()
+					g.Notify("Imported macro from " .. filename, 4)
+				else
+					g.Notify("Failed to read file.", 3)
+				end
+			else
+				g.Notify("Your executor doesn't support reading files.", 3)
 			end
 		end
 	})
