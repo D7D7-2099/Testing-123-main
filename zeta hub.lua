@@ -42118,6 +42118,8 @@ Z.MacroRecorder = {
 	},
 	CurrentSequence = {},
 	IsRunning = false,
+	IsRecording = false,
+	UpdateUIList = function() end,
 	PlayMacro = function()
 		if Z.MacroRecorder.IsRunning then return end
 		Z.MacroRecorder.IsRunning = true
@@ -42205,6 +42207,16 @@ Z.MacroRecorder = {
 					end
 					
 					if a and a.Save then a.Save.SaveDataSync() end
+				elseif step.Type == "Toggle" then
+					if G and G.Library and G.Library.Toggles and G.Library.Toggles[step.Id] then
+						G.Library.Toggles[step.Id]:SetValue(step.Value)
+						task.wait(0.05)
+					end
+				elseif step.Type == "Option" then
+					if G and G.Library and G.Library.Options and G.Library.Options[step.Id] then
+						G.Library.Options[step.Id]:SetValue(step.Value)
+						task.wait(0.05)
+					end
 				end
 			end
 			Z.MacroRecorder.IsRunning = false
@@ -42225,7 +42237,24 @@ g.MacroRecorderUi = function()
 	local V = G:AddLeftGroupbox("Macro Player", "play-circle")
 	local y = G:AddRightGroupbox("Add Actions", "plus-circle")
 	
-	V:AddLabel("Current Macro Sequence")
+	local SequenceLabel = V:AddLabel("Empty")
+	Z.MacroRecorder.UpdateUIList = function()
+		if not SequenceLabel then return end
+		if #Z.MacroRecorder.CurrentSequence == 0 then
+			SequenceLabel:SetText("Empty")
+			return
+		end
+		local lines = {}
+		for i, v in ipairs(Z.MacroRecorder.CurrentSequence) do
+			if i > 15 then table.insert(lines, "... and more") break end
+			if v.Type == "Action" then
+				table.insert(lines, tostring(i) .. ". " .. tostring(v.Action) .. (v.Action == "Delay" and (" (" .. tostring(v.Value) .. "s)") or ""))
+			elseif v.Type == "Toggle" or v.Type == "Option" then
+				table.insert(lines, tostring(i) .. ". " .. tostring(v.Id) .. " -> " .. tostring(v.Value))
+			end
+		end
+		SequenceLabel:SetText(table.concat(lines, "\n"))
+	end
 	
 	local DropdownActions
 	local DelayValue = 1
@@ -42260,6 +42289,7 @@ g.MacroRecorderUi = function()
 				Action = DropdownActions,
 				Value = DropdownActions == "Delay" and DelayValue or nil
 			})
+			Z.MacroRecorder.UpdateUIList()
 			g.Notify("Added " .. DropdownActions .. " to macro.", 2)
 		end
 	})
@@ -42268,7 +42298,29 @@ g.MacroRecorderUi = function()
 		Text = "❌ Clear All Blocks",
 		Func = function()
 			table.clear(Z.MacroRecorder.CurrentSequence)
+			Z.MacroRecorder.UpdateUIList()
 			g.Notify("Cleared macro sequence.", 2)
+		end
+	})
+	
+	y:AddDivider()
+	
+	local RecordBtn
+	RecordBtn = y:AddButton({
+		Text = "⏺ Start Recording",
+		Func = function()
+			if Z.MacroRecorder.IsRunning then
+				g.Notify("Stop playback first!", 2)
+				return
+			end
+			Z.MacroRecorder.IsRecording = not Z.MacroRecorder.IsRecording
+			if Z.MacroRecorder.IsRecording then
+				table.clear(Z.MacroRecorder.CurrentSequence)
+				Z.MacroRecorder.UpdateUIList()
+				g.Notify("Recording started. UI changes will be captured.", 3)
+			else
+				g.Notify("Recording stopped. Remember to save your macro.", 3)
+			end
 		end
 	})
 	
@@ -42327,6 +42379,7 @@ g.MacroRecorderUi = function()
 					table.insert(loaded, {Type = v.Type, Action = v.Action, Value = v.Value})
 				end
 				Z.MacroRecorder.CurrentSequence = loaded
+				Z.MacroRecorder.UpdateUIList()
 				g.Notify("Loaded macro: " .. MacroNameInput, 3)
 			else
 				g.Notify("Macro not found!", 3)
@@ -42357,6 +42410,42 @@ g.InitUi = function()
 	g.SettingsUi()
 	g.TweaksUi()
 	g.MacroRecorderUi()
+	
+	-- Setup Auto Recorder Hooks
+	task.spawn(function()
+		task.wait(1) -- wait for all UI to be properly initialized
+		if G and G.Library then
+			if G.Library.Toggles then
+				for id, toggleObj in pairs(G.Library.Toggles) do
+					toggleObj:OnChanged(function()
+						if Z.MacroRecorder.IsRecording and not Z.MacroRecorder.IsRunning then
+							table.insert(Z.MacroRecorder.CurrentSequence, {
+								Type = "Toggle",
+								Id = id,
+								Value = toggleObj.Value
+							})
+							Z.MacroRecorder.UpdateUIList()
+						end
+					end)
+				end
+			end
+			if G.Library.Options then
+				for id, optionObj in pairs(G.Library.Options) do
+					optionObj:OnChanged(function()
+						if Z.MacroRecorder.IsRecording and not Z.MacroRecorder.IsRunning then
+							table.insert(Z.MacroRecorder.CurrentSequence, {
+								Type = "Option",
+								Id = id,
+								Value = optionObj.Value
+							})
+							Z.MacroRecorder.UpdateUIList()
+						end
+					end)
+				end
+			end
+		end
+	end)
+
 	-- Fleet Manager UI
 	if g.FleetManager and type(g.FleetManager.BuildUI) == "function" then
 		g.FleetManager.BuildUI()
