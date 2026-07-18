@@ -735,7 +735,8 @@ local X = {
 	fleet_send_keep_amount = 0,
 	fleet_send_protect_favourites = true,
 	fleet_send_delay = 1.25,
-	fleet_send_preview_only = true
+	fleet_send_preview_only = true,
+	macro_recorder_macros = {}
 }
 local h = type(getgenv) == "function" and getgenv() or _G
 local l = type(h.gag2_config) == "table" and h.gag2_config or nil
@@ -5330,18 +5331,28 @@ Z.BackpackFruitPriceEsp = {
 		return tostring(math.floor(tonumber(G) or 0))
 	end;
 	GetOrCreateTotalLabelBackpackFruitPriceEsp = function()
-		local G = Z.BackpackFruitPriceEsp.GetBackpackGuiBackpackFruitPriceEsp()
+		local G = y.PlayerGui
 		if not G then
 			return nil
 		end
-		local V = G:FindFirstChild("ExoFruitTotalValueLabel")
+		local c = G:FindFirstChild("ExoInventoryValueGui")
+		if not c then
+			c = Instance.new("ScreenGui")
+			c.Name = "ExoInventoryValueGui"
+			c.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+			c.ResetOnSpawn = false
+			c.IgnoreGuiInset = true
+			c.Parent = G
+			c.DisplayOrder = 1000
+		end
+		local V = c:FindFirstChild("ExoFruitTotalValueLabel")
 		if V and V:IsA("TextLabel") then
 			return V
 		end
 		V = Instance.new("TextLabel")
 		V.Name = "ExoFruitTotalValueLabel"
 		V.AnchorPoint = Vector2.new(.5, 0)
-		V.Position = UDim2.new(.5, 0, 0, 3)
+		V.Position = UDim2.new(.5, 0, 0, 15)
 		V.Size = UDim2.new(0, 260, 0, 22)
 		V.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
 		V.BackgroundTransparency = .25
@@ -5357,21 +5368,21 @@ Z.BackpackFruitPriceEsp = {
 		V.TextYAlignment = Enum.TextYAlignment.Center
 		V.ZIndex = 999
 		V.Active = false
-		V.Parent = G
-		local y = Instance.new("UICorner")
-		y.CornerRadius = UDim.new(0, 5)
-		y.Parent = V
-		local j = Instance.new("UITextSizeConstraint")
-		j.MinTextSize = 10
-		j.MaxTextSize = 18
-		j.Parent = V
+		V.Parent = c
+		local y_corner = Instance.new("UICorner")
+		y_corner.CornerRadius = UDim.new(0, 5)
+		y_corner.Parent = V
+		local j_size = Instance.new("UITextSizeConstraint")
+		j_size.MinTextSize = 10
+		j_size.MaxTextSize = 18
+		j_size.Parent = V
 		return V
 	end,
 	ClearTotalLabelBackpackFruitPriceEsp = function()
-		local G = Z.BackpackFruitPriceEsp.GetBackpackGuiBackpackFruitPriceEsp()
-		local V = G and G:FindFirstChild("ExoFruitTotalValueLabel")
-		if V then
-			V:Destroy()
+		local G = y.PlayerGui
+		local c = G and G:FindFirstChild("ExoInventoryValueGui")
+		if c then
+			c:Destroy()
 		end
 		Z.BackpackFruitPriceEsp.LastTotalShownBackpackFruitPriceEsp = 0
 		Z.BackpackFruitPriceEsp.SetTotalStatusBackpackFruitPriceEsp("")
@@ -5394,7 +5405,10 @@ Z.BackpackFruitPriceEsp = {
 				continue
 			end
 			V += 1
-			local T = Z.BackpackFruitPriceEsp.GetToolPriceBackpackFruitPriceEsp(c)
+			local T = 0
+			if type(Z.BuySelectFruit) == "table" and type(Z.BuySelectFruit.GetBaseEstimatedPriceBuySelectFruit) == "function" then
+				T = Z.BuySelectFruit.GetBaseEstimatedPriceBuySelectFruit(J.calcName, J.sourceData, J.mutation)
+			end
 			T = math.max(math.floor(tonumber(T) or 0), 0)
 			if T > 0 then
 				y += 1
@@ -5412,7 +5426,7 @@ Z.BackpackFruitPriceEsp = {
 		local j = Z.BackpackFruitPriceEsp.FormatPriceBackpackFruitPriceEsp(G)
 		local i = Z.BackpackFruitPriceEsp.GetOrCreateTotalLabelBackpackFruitPriceEsp()
 		if i then
-			i.Text = string.format("<font color=\'#FFD700\'>Inventory Value:</font> <font color=\'#7CFC00\'>$%s</font> <font color=\'#FFFFFF\'>(%d fruits)</font>", j, V)
+			i.Text = string.format("<font color=\'#FFD700\'>Inventory Value (x1):</font> <font color=\'#7CFC00\'>$%s</font> <font color=\'#FFFFFF\'>(%d fruits)</font>", j, V)
 			i.Visible = true
 		end
 		Z.BackpackFruitPriceEsp.LastTotalShownBackpackFruitPriceEsp = V
@@ -42063,6 +42077,264 @@ g.SaveManagerUi = function()
 	end
 	Z.SaveSync.RefreshUiSaveSync()
 end
+
+Z.MacroRecorder = {
+	Actions = {
+		"Toggle Fruit Collector",
+		"Toggle Seed Placer",
+		"Toggle Auto Sell",
+		"Toggle Turbo Sell",
+		"Toggle Auto Water",
+		"Toggle Sprinkler Placer",
+		"Toggle Auto Shovel Fruits",
+		"Toggle Auto Shovel Plants",
+		"Toggle Egg Hatcher",
+		"Toggle Seed Pack Opener",
+		"Toggle Sell Multiplier",
+		"Toggle Block Mutation",
+		"Toggle Pet Equip",
+		"Toggle Pet Return Farm",
+		"Toggle Mail Auto Send",
+		"Toggle Gift Send",
+		"Toggle Gift Receive",
+		"Toggle Auctioneer",
+		"Toggle Seed Shop",
+		"Toggle Gear Shop",
+		"Toggle Crate Shop",
+		"Toggle Weather Kick",
+		"Toggle High Mode",
+		"Toggle Hide UI",
+		"Toggle Collection Teleport",
+		"Toggle Daily Deal",
+		"Toggle Double or Nothing",
+		"Toggle Pet Finder",
+		"Toggle Fleet Manager",
+		"Toggle Auto Favourite",
+		"Delay",
+		"Rejoin Server",
+		"Teleport to Farm",
+		"Sell All Fruits",
+		"Collect Selected Fruits",
+	},
+	CurrentSequence = {},
+	IsRunning = false,
+	PlayMacro = function()
+		if Z.MacroRecorder.IsRunning then return end
+		Z.MacroRecorder.IsRunning = true
+		task.spawn(function()
+			for _, step in ipairs(Z.MacroRecorder.CurrentSequence) do
+				if not Z.MacroRecorder.IsRunning then break end
+				
+				if step.Type == "Action" then
+					local action = step.Action
+					if action == "Delay" then
+						task.wait(tonumber(step.Value) or 1)
+					elseif action == "Toggle Fruit Collector" then
+						X.auto_collect_fruit_enabled = not X.auto_collect_fruit_enabled
+					elseif action == "Toggle Seed Placer" then
+						X.auto_seedplace = not X.auto_seedplace
+					elseif action == "Toggle Auto Sell" then
+						X.sell_use_filters = not X.sell_use_filters
+					elseif action == "Toggle Turbo Sell" then
+						X.turbo_sell = not X.turbo_sell
+					elseif action == "Toggle Auto Water" then
+						X.auto_water_plants = not X.auto_water_plants
+					elseif action == "Toggle Sprinkler Placer" then
+						X.auto_sprinkler_place = not X.auto_sprinkler_place
+					elseif action == "Toggle Auto Shovel Fruits" then
+						X.auto_shovel_fruits = not X.auto_shovel_fruits
+					elseif action == "Toggle Auto Shovel Plants" then
+						X.auto_shovel_plants = not X.auto_shovel_plants
+					elseif action == "Toggle Egg Hatcher" then
+						X.egg_hatcher_enabled = not X.egg_hatcher_enabled
+					elseif action == "Toggle Seed Pack Opener" then
+						X.seed_pack_opener_enabled = not X.seed_pack_opener_enabled
+					elseif action == "Toggle Sell Multiplier" then
+						X.sell_multiplier_enabled = not X.sell_multiplier_enabled
+					elseif action == "Toggle Block Mutation" then
+						X.mutation_seed_placer_enabled = not X.mutation_seed_placer_enabled
+					elseif action == "Toggle Pet Equip" then
+						X.pet_equip_enabled = not X.pet_equip_enabled
+					elseif action == "Toggle Pet Return Farm" then
+						X.pet_return_farm = not X.pet_return_farm
+					elseif action == "Toggle Mail Auto Send" then
+						X.mail_auto_send_enabled = not X.mail_auto_send_enabled
+					elseif action == "Toggle Gift Send" then
+						X.gift_send_enabled = not X.gift_send_enabled
+					elseif action == "Toggle Gift Receive" then
+						X.gift_receive_enabled = not X.gift_receive_enabled
+					elseif action == "Toggle Auctioneer" then
+						X.auctioneer_enabled = not X.auctioneer_enabled
+					elseif action == "Toggle Seed Shop" then
+						X.enabled_seed_shop = not X.enabled_seed_shop
+					elseif action == "Toggle Gear Shop" then
+						X.enabled_gear_shop = not X.enabled_gear_shop
+					elseif action == "Toggle Crate Shop" then
+						X.enabled_crate_shop = not X.enabled_crate_shop
+					elseif action == "Toggle Weather Kick" then
+						X.weather_kick_enabled = not X.weather_kick_enabled
+					elseif action == "Toggle High Mode" then
+						X.high_mode = not X.high_mode
+					elseif action == "Toggle Hide UI" then
+						X.hide_player_ui = not X.hide_player_ui
+					elseif action == "Toggle Collection Teleport" then
+						X.collection_teleport = not X.collection_teleport
+					elseif action == "Toggle Daily Deal" then
+						X.auto_use_daily_deal = not X.auto_use_daily_deal
+					elseif action == "Toggle Double or Nothing" then
+						X.auto_double_or_nothing = not X.auto_double_or_nothing
+					elseif action == "Toggle Pet Finder" then
+						X.pet_finder_enabled = not X.pet_finder_enabled
+					elseif action == "Toggle Fleet Manager" then
+						X.fleet_enabled = not X.fleet_enabled
+					elseif action == "Toggle Auto Favourite" then
+						X.auto_fruit_favourite_enabled = not X.auto_fruit_favourite_enabled
+					elseif action == "Rejoin Server" then
+						y.TeleportService:Teleport(game.PlaceId, y.LocalPlayer)
+					elseif action == "Teleport to Farm" then
+						if Z.Teleport and Z.Farm then
+							local cp = Z.Farm.GetCenterPointPart()
+							if cp then
+								Z.Teleport.TeleportTo(cp, true, g.TeleportLockNames.Other)
+							end
+						end
+					elseif action == "Sell All Fruits" then
+						if Z.SellManager then Z.SellManager.DoManualSellBuySelectFruit(false) end
+					elseif action == "Collect Selected Fruits" then
+						if Z.BuySelectFruit then Z.BuySelectFruit.CollectSelectedBuySelectFruit() end
+					end
+					
+					if a and a.Save then a.Save.SaveDataSync() end
+				end
+			end
+			Z.MacroRecorder.IsRunning = false
+		end)
+	end,
+	StopMacro = function()
+		Z.MacroRecorder.IsRunning = false
+	end,
+}
+
+g.MacroRecorderUi = function()
+	local G = d:AddTab({
+		Name = "\240\159\142\172 Macro Recorder";
+		Description = "Record and playback actions";
+		Icon = "video"
+	})
+	
+	local V = G:AddLeftGroupbox("Macro Player", "play-circle")
+	local y = G:AddRightGroupbox("Add Actions", "plus-circle")
+	
+	V:AddLabel("Current Macro Sequence")
+	
+	local DropdownActions
+	local DelayValue = 1
+	
+	y:AddDropdown("MacroActionSelector", {
+		Values = Z.MacroRecorder.Actions,
+		Default = 1,
+		Multi = false,
+		Text = "Action to Add",
+		Tooltip = "Select an action to append to the macro.",
+	}):OnChanged(function(Value)
+		DropdownActions = Value
+	end)
+	
+	y:AddInput("MacroDelayInput", {
+		Default = "1",
+		Numeric = true,
+		Finished = true,
+		Text = "Delay Time (s)",
+		Tooltip = "Used only if Action is 'Delay'",
+		Placeholder = "1",
+	}):OnChanged(function(Value)
+		DelayValue = tonumber(Value) or 1
+	end)
+	
+	y:AddButton({
+		Text = "➕ Add Block",
+		Func = function()
+			if not DropdownActions then return end
+			table.insert(Z.MacroRecorder.CurrentSequence, {
+				Type = "Action",
+				Action = DropdownActions,
+				Value = DropdownActions == "Delay" and DelayValue or nil
+			})
+			g.Notify("Added " .. DropdownActions .. " to macro.", 2)
+		end
+	})
+	
+	y:AddButton({
+		Text = "❌ Clear All Blocks",
+		Func = function()
+			table.clear(Z.MacroRecorder.CurrentSequence)
+			g.Notify("Cleared macro sequence.", 2)
+		end
+	})
+	
+	V:AddButton({
+		Text = "▶ Play Macro",
+		Func = function()
+			if #Z.MacroRecorder.CurrentSequence == 0 then
+				g.Notify("Macro is empty!", 3)
+				return
+			end
+			Z.MacroRecorder.PlayMacro()
+			g.Notify("Macro Started!", 3)
+		end
+	})
+	
+	V:AddButton({
+		Text = "⏹ Stop Macro",
+		Func = function()
+			Z.MacroRecorder.StopMacro()
+			g.Notify("Macro Stopped!", 3)
+		end
+	})
+	
+	local saveBox = G:AddLeftGroupbox("Save & Load", "save")
+	
+	local MacroNameInput = "MyMacro"
+	saveBox:AddInput("MacroName", {
+		Default = "MyMacro",
+		Numeric = false,
+		Finished = true,
+		Text = "Macro Name",
+		Tooltip = "Name of the macro to save/load",
+		Placeholder = "MyMacro",
+	}):OnChanged(function(Value)
+		MacroNameInput = Value
+	end)
+	
+	saveBox:AddButton({
+		Text = "💾 Save to Config",
+		Func = function()
+			if MacroNameInput == "" then return end
+			X.macro_recorder_macros = type(X.macro_recorder_macros) == "table" and X.macro_recorder_macros or {}
+			X.macro_recorder_macros[MacroNameInput] = Z.MacroRecorder.CurrentSequence
+			if a and a.Save then a.Save.SaveDataSync() end
+			g.Notify("Saved macro: " .. MacroNameInput, 3)
+		end
+	})
+	
+	saveBox:AddButton({
+		Text = "📂 Load from Config",
+		Func = function()
+			if MacroNameInput == "" then return end
+			if type(X.macro_recorder_macros) == "table" and X.macro_recorder_macros[MacroNameInput] then
+				local loaded = {}
+				for _, v in ipairs(X.macro_recorder_macros[MacroNameInput]) do
+					table.insert(loaded, {Type = v.Type, Action = v.Action, Value = v.Value})
+				end
+				Z.MacroRecorder.CurrentSequence = loaded
+				g.Notify("Loaded macro: " .. MacroNameInput, 3)
+			else
+				g.Notify("Macro not found!", 3)
+			end
+		end
+	})
+end
+
 g.InitUi = function()
 	g.HomeDashboardUi()
 	g.SaveManagerUi()
@@ -42084,6 +42356,7 @@ g.InitUi = function()
 	g.WebhooksUi()
 	g.SettingsUi()
 	g.TweaksUi()
+	g.MacroRecorderUi()
 	-- Fleet Manager UI
 	if g.FleetManager and type(g.FleetManager.BuildUI) == "function" then
 		g.FleetManager.BuildUI()
