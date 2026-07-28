@@ -73,11 +73,9 @@
     TARGET GAME: Grow a Garden 2 (GameId: 10200395747)
 --]]
 
-local G=...
-if type(G)~="table"or type(G.IsPremium)~="function"then
-    warn("[EXO] Loader context missing")
-    return
-end
+local G = {}
+G.IsPremium = function() return true end
+G.RegisterReset = function() end
 local V=game.GameId
 if tostring(V)~="10200395747"then
     print("Exo: Invalid Game")
