@@ -82,9 +82,9 @@ if tostring(V)~="10200395747"then
     return
 end
 if _G.is_running_gag2 then
-    warn("Already running x")
-    return
-end _G.is_running_gag2=true
+    warn("Already running x, but bypassing for test.")
+end
+_G.is_running_gag2=true
 local y={}
 local Z=task
 local j=Z print("exo start > ")print("Place Id ",game.PlaceId)print("GameId: ",V)
