@@ -76,6 +76,42 @@
 local G = {}
 G.IsPremium = function() return true end
 G.RegisterReset = function() end
+
+local isNoui = (tostring(getgenv().mode) == "noui")
+
+if isNoui then
+    -- Mock the UI library to absorb all UI creation calls without rendering anything
+    local mockMeta = {
+        __index = function(t, k) return t end,
+        __call = function(t, ...) return t end
+    }
+    local mockUI = setmetatable({}, mockMeta)
+    G.Library = mockUI
+    G.Window = mockUI
+    G.IsHeadless = function() return true end
+else
+    -- Load the real UI library from your link
+    local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/Reversed1337/Testing-123/refs/heads/main/zetahub_uilib"))()
+    G.Library = Library
+
+    -- Create the main window to pass to the script
+    G.Window = Library:CreateWindow({
+        Title = "Exotic Hub Pro",
+        Footer = "exotichub.app/join | Hello World!",
+        Position = UDim2.fromOffset(6, 6),
+        Size = UDim2.fromOffset(720, 600),
+        AutoShow = true,
+        Center = true,
+        Resizable = true,
+        SearchbarSize = UDim2.fromScale(1, 1),
+        CornerRadius = 4,
+        NotifySide = "Right",
+        ShowCustomCursor = false,
+        Font = Enum.Font.Code,
+        ToggleKeybind = Enum.KeyCode.RightControl,
+        MobileButtonsSide = "Left",
+    })
+end
 local V=game.GameId
 if tostring(V)~="10200395747"then
     print("Exo: Invalid Game")
