@@ -118,219 +118,219 @@ B.AreaByPlacement = {[B.RightBackCenter] = "PlantAreaColumn2";
 [B.LeftBackCenter] = "PlantAreaColumn1";
 [B.RightFrontCenter] = "PlantAreaColumn2";
 [B.LeftFrontCenter] = "PlantAreaColumn1"}
--- y.LoopWorkProfiler = { EnabledLoopWorkProfiler = false;
--- WindowSecondsLoopWorkProfiler = 3;
--- StatsLoopWorkProfiler = {};
--- LabelsByCoroutineLoopWorkProfiler = setmetatable({}, { __mode = "k"});
--- ActiveStartedAtByCoroutineLoopWorkProfiler = setmetatable({}, { __mode = "k"});
--- ReporterGenerationLoopWorkProfiler = 0;
--- LabelLoopWorkProfiler = nil;
--- TaskProxyLoopWorkProfiler = nil;
--- SetLabelTextLoopWorkProfiler = function(G)
---     local V = y.LoopWorkProfiler.LabelLoopWorkProfiler
---     if V and type(V.SetText) == "function" then
---         V:SetText(tostring(G or ""))
---     end
--- end, RecordDurationLoopWorkProfiler = function(G, V)
---     local Z = y.LoopWorkProfiler
---     if Z.EnabledLoopWorkProfiler ~= true then
---         return false
---     end
---     G = tostring(G or "")
---     V = tonumber(V) or 0
---     if G == "" or V < 0 then
---         return false
---     end
---     local j = Z.StatsLoopWorkProfiler[G]
---     if not j then
---         j = { total = 0, maximum = 0, samples = 0}
---         Z.StatsLoopWorkProfiler[G] = j
---     end
---     j.total += V
---     j.maximum = math.max(j.maximum, V)
---     j.samples += 1
---     return true
--- end, FinishCurrentSliceLoopWorkProfiler = function()
---     local G = y.LoopWorkProfiler
---     local V = coroutine.running()
---     if not V then
---         return false
---     end
---     local Z = G.ActiveStartedAtByCoroutineLoopWorkProfiler[V]
---     G.ActiveStartedAtByCoroutineLoopWorkProfiler[V] = nil
---     if not Z then
---         return false
---     end
---     local j = G.LabelsByCoroutineLoopWorkProfiler[V]
---     if not j then
---         return false
---     end
---     return G.RecordDurationLoopWorkProfiler(j, os.clock() - Z)
--- end, ResumeCurrentSliceLoopWorkProfiler = function()
---     local G = y.LoopWorkProfiler
---     if G.EnabledLoopWorkProfiler ~= true then
---         return false
---     end
---     local V = coroutine.running()
---     if not V or not G.LabelsByCoroutineLoopWorkProfiler[V] then
---         return false
---     end
---     G.ActiveStartedAtByCoroutineLoopWorkProfiler[V] = os.clock()
---     return true
--- end;
--- SetCurrentLoopNameLoopWorkProfiler = function(G)
---     local V = y.LoopWorkProfiler
---     local Z = coroutine.running()
---     if not Z then
---         return nil
---     end
---     if V.EnabledLoopWorkProfiler == true then
---         V.FinishCurrentSliceLoopWorkProfiler()
---     end
---     local j = V.LabelsByCoroutineLoopWorkProfiler[Z]
---     V.LabelsByCoroutineLoopWorkProfiler[Z] = tostring(G or "")
---     if V.EnabledLoopWorkProfiler == true then
---         V.ResumeCurrentSliceLoopWorkProfiler()
---     end
---     return j
--- end, RestoreCurrentLoopNameLoopWorkProfiler = function(G)
---     local V = y.LoopWorkProfiler
---     local Z = coroutine.running()
---     if not Z then
---         return false
---     end
---     if V.EnabledLoopWorkProfiler == true then
---         V.FinishCurrentSliceLoopWorkProfiler()
---     end
---     V.LabelsByCoroutineLoopWorkProfiler[Z] = G
---     if V.EnabledLoopWorkProfiler == true and G then
---         V.ResumeCurrentSliceLoopWorkProfiler()
---     end
---     return true
--- end, MeasureLoopWorkProfiler = function(G, V, ...)
---     if type(V) ~= "function" then
---         return nil
---     end
---     local Z = y.LoopWorkProfiler
---     if Z.EnabledLoopWorkProfiler ~= true then
---         return V(...)
---     end
---     local j = Z.SetCurrentLoopNameLoopWorkProfiler(G)
---     local i = table.pack(pcall(V, ...))
---     Z.RestoreCurrentLoopNameLoopWorkProfiler(j)
---     if not i[1] then
---         error(i[2], 0)
---     end
---     return table.unpack(i, 2, i.n)
--- end;
--- RunNamedLoopWorkProfiler = function(G, V, ...)
---     if type(V) ~= "function" then
---         return nil
---     end
---     local Z = y.LoopWorkProfiler
---     local j = Z.SetCurrentLoopNameLoopWorkProfiler(G)
---     local i = table.pack(pcall(V, ...))
---     Z.RestoreCurrentLoopNameLoopWorkProfiler(j)
---     if not i[1] then
---         error(i[2], 0)
---     end
---     return table.unpack(i, 2, i.n)
--- end;
--- SpawnNamedLoopWorkProfiler = function(G, V, ...)
---     if type(V) ~= "function" then
---         return nil
---     end
---     local j = table.pack(...)
---     return Z.spawn(function()
---         local Z = y.LoopWorkProfiler
---         local i = Z.SetCurrentLoopNameLoopWorkProfiler(G)
---         local c = table.pack(pcall(V, table.unpack(j, 1, j.n)))
---         Z.RestoreCurrentLoopNameLoopWorkProfiler(i)
---         if not c[1] then
---             error(c[2], 0)
---         end
---     end)
--- end;
--- PublishWindowLoopWorkProfiler = function()
---     local G = y.LoopWorkProfiler
---     local V = G.StatsLoopWorkProfiler
---     G.StatsLoopWorkProfiler = {}
---     local Z = {}
---     for G, V in pairs(V) do
---         if type(V) == "table" and((tonumber(V.samples) or 0)) > 0 then
---             Z[# Z + 1] = { label = tostring(G), total = tonumber(V.total) or 0;
---             maximum = tonumber(V.maximum) or 0;
---             samples = tonumber(V.samples) or 0}
---         end
---     end
---     table.sort(Z, function(G, V)
---         if G.total ~= V.total then
---             return G.total > V.total
---         end
---         return G.label < V.label
---     end)
---     local j = G.WindowSecondsLoopWorkProfiler
---     local i = { string.format("<b>Active loop work \226\128\162 last %ds</b>", j)}
---     if # Z == 0 then
---         i[# i + 1] = "<font color=\'#AFAFAF\'>No tracked loop work in this window.</font>"
---     else
---         for G, V in ipairs(Z) do
---             local y = V.total / math.max(V.samples, 1)
---             i[# i + 1] = string.format("<font color=\'#66CCFF\'>%s</font> | last %ds: <font color=\'#FFFFFF\'>%.4fs</font> | avg: <font color=\'#CFCFCF\'>%.6fs</font> | max: <font color=\'#FFCC66\'>%.6fs</font> | x%d", V.label, j, V.total, y, V.maximum, V.samples)
---         end
---     end
---     G.SetLabelTextLoopWorkProfiler(table.concat(i, "\n"))
---     return true
--- end, StartLoopWorkProfiler = function()
---     local G = y.LoopWorkProfiler
---     if G.EnabledLoopWorkProfiler == true then
---         return false
---     end
---     G.EnabledLoopWorkProfiler = true
---     G.StatsLoopWorkProfiler = {}
---     G.ReporterGenerationLoopWorkProfiler += 1
---     j = G.TaskProxyLoopWorkProfiler
---     G.SetLabelTextLoopWorkProfiler(string.format("<font color=\'#FFCC66\'>Collecting the first %d-second window...</font>", G.WindowSecondsLoopWorkProfiler))
---     local V = G.ReporterGenerationLoopWorkProfiler
---     Z.spawn(function()
---         while G.EnabledLoopWorkProfiler == true and V == G.ReporterGenerationLoopWorkProfiler do
---             Z.wait(G.WindowSecondsLoopWorkProfiler)
---             if G.EnabledLoopWorkProfiler == true and V == G.ReporterGenerationLoopWorkProfiler then
---                 G.PublishWindowLoopWorkProfiler()
---             end
---         end
---     end)
---     return true
--- end, StopLoopWorkProfiler = function()
---     local G = y.LoopWorkProfiler
---     G.EnabledLoopWorkProfiler = false
---     G.ReporterGenerationLoopWorkProfiler += 1
---     G.StatsLoopWorkProfiler = {}
---     table.clear(G.ActiveStartedAtByCoroutineLoopWorkProfiler)
---     j = Z
---     G.SetLabelTextLoopWorkProfiler("<font color=\'#AFAFAF\'>Loop tracking stopped.</font>")
---     return true
--- end}
--- y.LoopWorkProfiler.TaskProxyLoopWorkProfiler = setmetatable({ wait = function(G)
---     local V = y.LoopWorkProfiler
---     if V.EnabledLoopWorkProfiler == true then
---         V.FinishCurrentSliceLoopWorkProfiler()
+y.LoopWorkProfiler = { EnabledLoopWorkProfiler = false;
+WindowSecondsLoopWorkProfiler = 3;
+StatsLoopWorkProfiler = {};
+LabelsByCoroutineLoopWorkProfiler = setmetatable({}, { __mode = "k"});
+ActiveStartedAtByCoroutineLoopWorkProfiler = setmetatable({}, { __mode = "k"});
+ReporterGenerationLoopWorkProfiler = 0;
+LabelLoopWorkProfiler = nil;
+TaskProxyLoopWorkProfiler = nil;
+SetLabelTextLoopWorkProfiler = function(G)
+    local V = y.LoopWorkProfiler.LabelLoopWorkProfiler
+    if V and type(V.SetText) == "function" then
+        V:SetText(tostring(G or ""))
+    end
+end, RecordDurationLoopWorkProfiler = function(G, V)
+    local Z = y.LoopWorkProfiler
+    if Z.EnabledLoopWorkProfiler ~= true then
+        return false
+    end
+    G = tostring(G or "")
+    V = tonumber(V) or 0
+    if G == "" or V < 0 then
+        return false
+    end
+    local j = Z.StatsLoopWorkProfiler[G]
+    if not j then
+        j = { total = 0, maximum = 0, samples = 0}
+        Z.StatsLoopWorkProfiler[G] = j
+    end
+    j.total += V
+    j.maximum = math.max(j.maximum, V)
+    j.samples += 1
+    return true
+end, FinishCurrentSliceLoopWorkProfiler = function()
+    local G = y.LoopWorkProfiler
+    local V = coroutine.running()
+    if not V then
+        return false
+    end
+    local Z = G.ActiveStartedAtByCoroutineLoopWorkProfiler[V]
+    G.ActiveStartedAtByCoroutineLoopWorkProfiler[V] = nil
+    if not Z then
+        return false
+    end
+    local j = G.LabelsByCoroutineLoopWorkProfiler[V]
+    if not j then
+        return false
+    end
+    return G.RecordDurationLoopWorkProfiler(j, os.clock() - Z)
+end, ResumeCurrentSliceLoopWorkProfiler = function()
+    local G = y.LoopWorkProfiler
+    if G.EnabledLoopWorkProfiler ~= true then
+        return false
+    end
+    local V = coroutine.running()
+    if not V or not G.LabelsByCoroutineLoopWorkProfiler[V] then
+        return false
+    end
+    G.ActiveStartedAtByCoroutineLoopWorkProfiler[V] = os.clock()
+    return true
+end;
+SetCurrentLoopNameLoopWorkProfiler = function(G)
+    local V = y.LoopWorkProfiler
+    local Z = coroutine.running()
+    if not Z then
+        return nil
+    end
+    if V.EnabledLoopWorkProfiler == true then
+        V.FinishCurrentSliceLoopWorkProfiler()
+    end
+    local j = V.LabelsByCoroutineLoopWorkProfiler[Z]
+    V.LabelsByCoroutineLoopWorkProfiler[Z] = tostring(G or "")
+    if V.EnabledLoopWorkProfiler == true then
+        V.ResumeCurrentSliceLoopWorkProfiler()
+    end
+    return j
+end, RestoreCurrentLoopNameLoopWorkProfiler = function(G)
+    local V = y.LoopWorkProfiler
+    local Z = coroutine.running()
+    if not Z then
+        return false
+    end
+    if V.EnabledLoopWorkProfiler == true then
+        V.FinishCurrentSliceLoopWorkProfiler()
+    end
+    V.LabelsByCoroutineLoopWorkProfiler[Z] = G
+    if V.EnabledLoopWorkProfiler == true and G then
+        V.ResumeCurrentSliceLoopWorkProfiler()
+    end
+    return true
+end, MeasureLoopWorkProfiler = function(G, V, ...)
+    if type(V) ~= "function" then
+        return nil
+    end
+    local Z = y.LoopWorkProfiler
+    if Z.EnabledLoopWorkProfiler ~= true then
+        return V(...)
+    end
+    local j = Z.SetCurrentLoopNameLoopWorkProfiler(G)
+    local i = table.pack(pcall(V, ...))
+    Z.RestoreCurrentLoopNameLoopWorkProfiler(j)
+    if not i[1] then
+        error(i[2], 0)
+    end
+    return table.unpack(i, 2, i.n)
+end;
+RunNamedLoopWorkProfiler = function(G, V, ...)
+    if type(V) ~= "function" then
+        return nil
+    end
+    local Z = y.LoopWorkProfiler
+    local j = Z.SetCurrentLoopNameLoopWorkProfiler(G)
+    local i = table.pack(pcall(V, ...))
+    Z.RestoreCurrentLoopNameLoopWorkProfiler(j)
+    if not i[1] then
+        error(i[2], 0)
+    end
+    return table.unpack(i, 2, i.n)
+end;
+SpawnNamedLoopWorkProfiler = function(G, V, ...)
+    if type(V) ~= "function" then
+        return nil
+    end
+    local j = table.pack(...)
+    return Z.spawn(function()
+        local Z = y.LoopWorkProfiler
+        local i = Z.SetCurrentLoopNameLoopWorkProfiler(G)
+        local c = table.pack(pcall(V, table.unpack(j, 1, j.n)))
+        Z.RestoreCurrentLoopNameLoopWorkProfiler(i)
+        if not c[1] then
+            error(c[2], 0)
+        end
+    end)
+end;
+PublishWindowLoopWorkProfiler = function()
+    local G = y.LoopWorkProfiler
+    local V = G.StatsLoopWorkProfiler
+    G.StatsLoopWorkProfiler = {}
+    local Z = {}
+    for G, V in pairs(V) do
+        if type(V) == "table" and((tonumber(V.samples) or 0)) > 0 then
+            Z[# Z + 1] = { label = tostring(G), total = tonumber(V.total) or 0;
+            maximum = tonumber(V.maximum) or 0;
+            samples = tonumber(V.samples) or 0}
+        end
+    end
+    table.sort(Z, function(G, V)
+        if G.total ~= V.total then
+            return G.total > V.total
+        end
+        return G.label < V.label
+    end)
+    local j = G.WindowSecondsLoopWorkProfiler
+    local i = { string.format("<b>Active loop work \226\128\162 last %ds</b>", j)}
+    if # Z == 0 then
+        i[# i + 1] = "<font color=\'#AFAFAF\'>No tracked loop work in this window.</font>"
+    else
+        for G, V in ipairs(Z) do
+            local y = V.total / math.max(V.samples, 1)
+            i[# i + 1] = string.format("<font color=\'#66CCFF\'>%s</font> | last %ds: <font color=\'#FFFFFF\'>%.4fs</font> | avg: <font color=\'#CFCFCF\'>%.6fs</font> | max: <font color=\'#FFCC66\'>%.6fs</font> | x%d", V.label, j, V.total, y, V.maximum, V.samples)
+        end
+    end
+    G.SetLabelTextLoopWorkProfiler(table.concat(i, "\n"))
+    return true
+end, StartLoopWorkProfiler = function()
+    local G = y.LoopWorkProfiler
+    if G.EnabledLoopWorkProfiler == true then
+        return false
+    end
+    G.EnabledLoopWorkProfiler = true
+    G.StatsLoopWorkProfiler = {}
+    G.ReporterGenerationLoopWorkProfiler += 1
+    j = G.TaskProxyLoopWorkProfiler
+    G.SetLabelTextLoopWorkProfiler(string.format("<font color=\'#FFCC66\'>Collecting the first %d-second window...</font>", G.WindowSecondsLoopWorkProfiler))
+    local V = G.ReporterGenerationLoopWorkProfiler
+    Z.spawn(function()
+        while G.EnabledLoopWorkProfiler == true and V == G.ReporterGenerationLoopWorkProfiler do
+            Z.wait(G.WindowSecondsLoopWorkProfiler)
+            if G.EnabledLoopWorkProfiler == true and V == G.ReporterGenerationLoopWorkProfiler then
+                G.PublishWindowLoopWorkProfiler()
+            end
+        end
+    end)
+    return true
+end, StopLoopWorkProfiler = function()
+    local G = y.LoopWorkProfiler
+    G.EnabledLoopWorkProfiler = false
+    G.ReporterGenerationLoopWorkProfiler += 1
+    G.StatsLoopWorkProfiler = {}
+    table.clear(G.ActiveStartedAtByCoroutineLoopWorkProfiler)
+    j = Z
+    G.SetLabelTextLoopWorkProfiler("<font color=\'#AFAFAF\'>Loop tracking stopped.</font>")
+    return true
+end}
+y.LoopWorkProfiler.TaskProxyLoopWorkProfiler = setmetatable({ wait = function(G)
+    local V = y.LoopWorkProfiler
+    if V.EnabledLoopWorkProfiler == true then
+        V.FinishCurrentSliceLoopWorkProfiler()
     end
     local j = Z.wait(G)
---     if V.EnabledLoopWorkProfiler == true then
---         V.ResumeCurrentSliceLoopWorkProfiler()
+    if V.EnabledLoopWorkProfiler == true then
+        V.ResumeCurrentSliceLoopWorkProfiler()
     end
     return j
 end;
 spawn = function(G, ...)
---     local V = y.LoopWorkProfiler
+    local V = y.LoopWorkProfiler
     local j = coroutine.running()
     local i = nil
     if j then
---         i = V.LabelsByCoroutineLoopWorkProfiler[j]
+        i = V.LabelsByCoroutineLoopWorkProfiler[j]
     end
     if i then
---         return V.SpawnNamedLoopWorkProfiler(i, G, ...)
+        return V.SpawnNamedLoopWorkProfiler(i, G, ...)
     end
     return Z.spawn(G, ...)
 end}, { __index = Z})
@@ -811,7 +811,7 @@ end, BuildCopyWithLoaderText = function()
     "getgenv().share_code = \"YOUR_SHARE_CODE\"";
     "getgenv().share_autosync = true", "";
     G, "";
-    "loadstring(game:HttpGet(\""))()"}, "\n")
+    "loadstring(game:HttpGet(\"https://exotichub.app/auto.lua\"))()"}, "\n")
 end;
 BuildShareLauncherText = function()
     local G =(tostring(L.save_sync_own_share_code or "")):gsub("%s+", "")
@@ -824,7 +824,7 @@ BuildShareLauncherText = function()
     "-- Keep it enabled to continue to get lastest sync data from your main account.";
     "getgenv().share_autosync = true";
     "";
-    "loadstring(game:HttpGet(\""))()"}, "\n")
+    "loadstring(game:HttpGet(\"https://exotichub.app/auto.lua\"))()"}, "\n")
 end}
 d.Save = { RequireSave = false, SaveData = function(G)
     if d.Config.OverrideEnabled then
@@ -881,7 +881,7 @@ SaveLoop = function()
     if d.Config.OverrideEnabled then
         return false
     end
---     y.LoopWorkProfiler.SpawnNamedLoopWorkProfiler("Save Data", function()
+    y.LoopWorkProfiler.SpawnNamedLoopWorkProfiler("Save Data", function()
         while true do
             j.wait(.5)
             if d.Config.OverrideEnabled then
@@ -1008,97 +1008,97 @@ i.fails = 0 function i.safeRequire(G)
     end
     return y
 end
--- y.SaveDataKickRemoteRejoin = { PayloadUrlSaveDataKickRemoteRejoin = "";
--- CacheFileSaveDataKickRemoteRejoin = "exo_save_data_kick_rejoin_queue.lua", StartedSaveDataKickRemoteRejoin = false, GetQueueSaveDataKickRemoteRejoin = function()
---     if type(queue_on_teleport) == "function" then
---         return queue_on_teleport
---     end
---     if type(syn) == "table" and type(syn.queue_on_teleport) == "function" then
---         return syn.queue_on_teleport
---     end
---     if type(fluxus) == "table" and type(fluxus.queue_on_teleport) == "function" then
---         return fluxus.queue_on_teleport
---     end
---     return nil
--- end, IsValidPayloadSaveDataKickRemoteRejoin = function(G)
---     if type(G) ~= "string" or # G < 500 then
---         return false
---     end
---     return G:find("EXO_SAVE_DATA_KICK_REMOTE_PAYLOAD_V1", 1, true) ~= nil
--- end;
--- ReadCachedPayloadSaveDataKickRemoteRejoin = function()
---     local G = y.SaveDataKickRemoteRejoin.CacheFileSaveDataKickRemoteRejoin
---     if type(isfile) ~= "function" or type(readfile) ~= "function" or not isfile(G) then
---         return nil
---     end
---     local V, Z = pcall(function()
---         return readfile(G)
---     end)
---     if V and y.SaveDataKickRemoteRejoin.IsValidPayloadSaveDataKickRemoteRejoin(Z) then
---         return Z
---     end
---     return nil
--- end;
--- FetchPayloadSaveDataKickRemoteRejoin = function()
---     local G = y.SaveDataKickRemoteRejoin.PayloadUrlSaveDataKickRemoteRejoin
---     local V, Z = pcall(function()
---         return game:HttpGet(G, true)
---     end)
---     if V and y.SaveDataKickRemoteRejoin.IsValidPayloadSaveDataKickRemoteRejoin(Z) then
---         return Z
---     end
---     return nil
--- end, CachePayloadSaveDataKickRemoteRejoin = function(G)
---     if type(writefile) ~= "function" then
---         return false
---     end
---     if not y.SaveDataKickRemoteRejoin.IsValidPayloadSaveDataKickRemoteRejoin(G) then
---         return false
---     end
---     local V = y.SaveDataKickRemoteRejoin.CacheFileSaveDataKickRemoteRejoin
---     pcall(function()
---         writefile(V, G)
---     end)
---     return true
--- end;
--- GetPayloadSaveDataKickRemoteRejoin = function()
---     local G = y.SaveDataKickRemoteRejoin.FetchPayloadSaveDataKickRemoteRejoin()
---     if G then
---         y.SaveDataKickRemoteRejoin.CachePayloadSaveDataKickRemoteRejoin(G)
---         return G
---     end
---     return y.SaveDataKickRemoteRejoin.ReadCachedPayloadSaveDataKickRemoteRejoin()
--- end;
--- QueuePayloadSaveDataKickRemoteRejoin = function()
---     local G = y.SaveDataKickRemoteRejoin.GetQueueSaveDataKickRemoteRejoin()
---     if type(G) ~= "function" then
---         warn("[EXO SaveDataKick] queue_on_teleport missing")
---         return false
---     end
---     local V = y.SaveDataKickRemoteRejoin.CacheFileSaveDataKickRemoteRejoin
---     if type(readfile) ~= "function" then
---         warn("[EXO SaveDataKick] readfile missing")
---         return false
---     end
---     pcall(function()
---         G("loadstring(readfile(\"" ..(V .. "\"))()"))
---     end)
---     warn("[EXO SaveDataKick] queued remote cached payload")
---     return true
--- end;
--- StartSaveDataKickRemoteRejoin = function()
---     if y.SaveDataKickRemoteRejoin.StartedSaveDataKickRemoteRejoin then
---         return false
---     end
---     y.SaveDataKickRemoteRejoin.StartedSaveDataKickRemoteRejoin = true
---     local G = y.SaveDataKickRemoteRejoin.GetPayloadSaveDataKickRemoteRejoin()
---     if not G then
---         warn("[EXO SaveDataKick] payload fetch/cache failed")
---         return false
---     end
---     y.SaveDataKickRemoteRejoin.CachePayloadSaveDataKickRemoteRejoin(G)
---     return y.SaveDataKickRemoteRejoin.QueuePayloadSaveDataKickRemoteRejoin()
--- end}
+y.SaveDataKickRemoteRejoin = { PayloadUrlSaveDataKickRemoteRejoin = "";
+CacheFileSaveDataKickRemoteRejoin = "exo_save_data_kick_rejoin_queue.lua", StartedSaveDataKickRemoteRejoin = false, GetQueueSaveDataKickRemoteRejoin = function()
+    if type(queue_on_teleport) == "function" then
+        return queue_on_teleport
+    end
+    if type(syn) == "table" and type(syn.queue_on_teleport) == "function" then
+        return syn.queue_on_teleport
+    end
+    if type(fluxus) == "table" and type(fluxus.queue_on_teleport) == "function" then
+        return fluxus.queue_on_teleport
+    end
+    return nil
+end, IsValidPayloadSaveDataKickRemoteRejoin = function(G)
+    if type(G) ~= "string" or # G < 500 then
+        return false
+    end
+    return G:find("EXO_SAVE_DATA_KICK_REMOTE_PAYLOAD_V1", 1, true) ~= nil
+end;
+ReadCachedPayloadSaveDataKickRemoteRejoin = function()
+    local G = y.SaveDataKickRemoteRejoin.CacheFileSaveDataKickRemoteRejoin
+    if type(isfile) ~= "function" or type(readfile) ~= "function" or not isfile(G) then
+        return nil
+    end
+    local V, Z = pcall(function()
+        return readfile(G)
+    end)
+    if V and y.SaveDataKickRemoteRejoin.IsValidPayloadSaveDataKickRemoteRejoin(Z) then
+        return Z
+    end
+    return nil
+end;
+FetchPayloadSaveDataKickRemoteRejoin = function()
+    local G = y.SaveDataKickRemoteRejoin.PayloadUrlSaveDataKickRemoteRejoin
+    local V, Z = pcall(function()
+        return game:HttpGet(G, true)
+    end)
+    if V and y.SaveDataKickRemoteRejoin.IsValidPayloadSaveDataKickRemoteRejoin(Z) then
+        return Z
+    end
+    return nil
+end, CachePayloadSaveDataKickRemoteRejoin = function(G)
+    if type(writefile) ~= "function" then
+        return false
+    end
+    if not y.SaveDataKickRemoteRejoin.IsValidPayloadSaveDataKickRemoteRejoin(G) then
+        return false
+    end
+    local V = y.SaveDataKickRemoteRejoin.CacheFileSaveDataKickRemoteRejoin
+    pcall(function()
+        writefile(V, G)
+    end)
+    return true
+end;
+GetPayloadSaveDataKickRemoteRejoin = function()
+    local G = y.SaveDataKickRemoteRejoin.FetchPayloadSaveDataKickRemoteRejoin()
+    if G then
+        y.SaveDataKickRemoteRejoin.CachePayloadSaveDataKickRemoteRejoin(G)
+        return G
+    end
+    return y.SaveDataKickRemoteRejoin.ReadCachedPayloadSaveDataKickRemoteRejoin()
+end;
+QueuePayloadSaveDataKickRemoteRejoin = function()
+    local G = y.SaveDataKickRemoteRejoin.GetQueueSaveDataKickRemoteRejoin()
+    if type(G) ~= "function" then
+        warn("[EXO SaveDataKick] queue_on_teleport missing")
+        return false
+    end
+    local V = y.SaveDataKickRemoteRejoin.CacheFileSaveDataKickRemoteRejoin
+    if type(readfile) ~= "function" then
+        warn("[EXO SaveDataKick] readfile missing")
+        return false
+    end
+    pcall(function()
+        G("loadstring(readfile(\"" ..(V .. "\"))()"))
+    end)
+    warn("[EXO SaveDataKick] queued remote cached payload")
+    return true
+end;
+StartSaveDataKickRemoteRejoin = function()
+    if y.SaveDataKickRemoteRejoin.StartedSaveDataKickRemoteRejoin then
+        return false
+    end
+    y.SaveDataKickRemoteRejoin.StartedSaveDataKickRemoteRejoin = true
+    local G = y.SaveDataKickRemoteRejoin.GetPayloadSaveDataKickRemoteRejoin()
+    if not G then
+        warn("[EXO SaveDataKick] payload fetch/cache failed")
+        return false
+    end
+    y.SaveDataKickRemoteRejoin.CachePayloadSaveDataKickRemoteRejoin(G)
+    return y.SaveDataKickRemoteRejoin.QueuePayloadSaveDataKickRemoteRejoin()
+end}
 -- y.SaveDataKickRemoteRejoin.StartSaveDataKickRemoteRejoin()
 i.Networking = i.safeRequire(i.SharedModules:WaitForChild("Networking"))
 i.SeedData = i.safeRequire(i.SharedModules:WaitForChild("SeedData"))
@@ -1203,7 +1203,7 @@ if L.hide_exo_hub_ui then
 end
 i.AppName = "Exotic Hub"
 i.CurentV = "v115"
-i.invite_link_url = ""
+i.invite_link_url = "https://exotichub.app/join"
 i.invite_link_short = "exotichub.app/join"
 local O = { enabled = false;
 status = "";
@@ -1397,8 +1397,8 @@ PostJson = function(G, V)
 end}
 J.SaveSyncStatusText = ""
 J.TotalControlStatusText = ""
-y.SaveSync = { PushUrlSaveSync = "";
-PullUrlSaveSync = "", GameKeySaveSync = "gag2";
+y.SaveSync = { PushUrlSaveSync = "https://exotichub.app/push-data";
+PullUrlSaveSync = "https://exotichub.app/pull-sync", GameKeySaveSync = "gag2";
 StartedSaveSync = false, PushBusySaveSync = false;
 PullBusySaveSync = false;
 LastEncodedSaveSync = "";
@@ -1645,7 +1645,7 @@ StartSaveSync = function()
         return false
     end
     y.SaveSync.StartedSaveSync = true
---     y.LoopWorkProfiler.SpawnNamedLoopWorkProfiler("Save Sync Push", function()
+    y.LoopWorkProfiler.SpawnNamedLoopWorkProfiler("Save Sync Push", function()
         j.wait(3)
         while y.SaveSync.StartedSaveSync and not J.is_forced_stop do
             if L.save_sync_online_enabled == true then
@@ -1660,7 +1660,7 @@ StartSaveSync = function()
             j.wait(10)
         end
     end)
---     y.LoopWorkProfiler.SpawnNamedLoopWorkProfiler("Save Sync Pull", function()
+    y.LoopWorkProfiler.SpawnNamedLoopWorkProfiler("Save Sync Pull", function()
         j.wait(5)
         while y.SaveSync.StartedSaveSync and not J.is_forced_stop do
             if L.save_sync_auto_pull_enabled == true then
@@ -1683,7 +1683,7 @@ StartSaveSync = function()
     end)
     return true
 end}
-y.WebApi = { Url = "", Busy = false, LinkDevice = function()
+y.WebApi = { Url = "https://exotichub.app/api/linkapidevice", Busy = false, LinkDevice = function()
     if y.WebApi.Busy then
         return false, "Link request already running"
     end
@@ -2090,7 +2090,7 @@ end, StartPlantVisualBlocker = function()
     else
         y.PlantVisualBlocker.CacheAllPlantHeightsPlantVisualBlocker()
     end
---     y.LoopWorkProfiler.SpawnNamedLoopWorkProfiler("Plant Visual Blocker", function()
+    y.LoopWorkProfiler.SpawnNamedLoopWorkProfiler("Plant Visual Blocker", function()
         while not J.is_forced_stop do
             j.wait(2)
             if not y.PlantVisualBlocker.IsEnabledPlantVisualBlocker() then
@@ -2209,7 +2209,7 @@ end, StartWeatherVisualBlocker = function()
     y.WeatherVisualBlocker.StartedWeatherVisualBlocker = true
     y.WeatherVisualBlocker.LoadWeatherModulesWeatherVisualBlocker()
     y.WeatherVisualBlocker.PatchCachedWeatherModulesWeatherVisualBlocker()
---     y.LoopWorkProfiler.SpawnNamedLoopWorkProfiler("Weather Visual Blocker", function()
+    y.LoopWorkProfiler.SpawnNamedLoopWorkProfiler("Weather Visual Blocker", function()
         while not J.is_forced_stop do
             if y.WeatherVisualBlocker.IsEnabledWeatherVisualBlocker() then
                 y.WeatherVisualBlocker.LoadWeatherModulesWeatherVisualBlocker()
@@ -2507,7 +2507,7 @@ end, StartFullPerformanceMode = function()
         return false
     end
     y.FullPerformanceMode.StartedFullPerformanceMode = true
---     y.LoopWorkProfiler.SpawnNamedLoopWorkProfiler("Full Performance Mode", function()
+    y.LoopWorkProfiler.SpawnNamedLoopWorkProfiler("Full Performance Mode", function()
         while not J.is_forced_stop do
             y.FullPerformanceMode.ApplyFpsLimitFullPerformanceMode()
             local G = y.FullPerformanceMode.IsEnabledFullPerformanceMode()
@@ -2710,7 +2710,7 @@ H.applySmoothRainbow = function(G, V)
     local Z = 0
     local j
     j = i.RunService.Heartbeat:Connect(function(i)
---         return y.LoopWorkProfiler.MeasureLoopWorkProfiler("Rainbow Text", function()
+        return y.LoopWorkProfiler.MeasureLoopWorkProfiler("Rainbow Text", function()
             if not G or not G.Parent then
                 j:Disconnect()
                 return
@@ -2935,7 +2935,7 @@ end, StartRuntimeStats = function()
     end
     y.RuntimeStats.StartedRuntimeStats = true
     i.RunService.RenderStepped:Connect(function(G)
---         return y.LoopWorkProfiler.MeasureLoopWorkProfiler("Runtime Stats", function()
+        return y.LoopWorkProfiler.MeasureLoopWorkProfiler("Runtime Stats", function()
             y.RuntimeStats.FrameCountRuntimeStats += 1
             y.RuntimeStats.FrameTotalRuntimeStats += G
             local V = os.clock()
@@ -3484,7 +3484,7 @@ Start = function()
         return
     end
     y.GameApi.Started = true
---     y.LoopWorkProfiler.SpawnNamedLoopWorkProfiler("Game API", function()
+    y.LoopWorkProfiler.SpawnNamedLoopWorkProfiler("Game API", function()
         j.wait(2)
         while true do
             y.GameApi.Send()
@@ -3961,7 +3961,7 @@ end, StartAutoTutorial = function()
             end)
         end)
     end
---     y.LoopWorkProfiler.SpawnNamedLoopWorkProfiler("Auto Tutorial", function()
+    y.LoopWorkProfiler.SpawnNamedLoopWorkProfiler("Auto Tutorial", function()
         local G = os.clock()
         while not J.is_forced_stop and os.clock() - G < 16 do
             y.AutoTutorial.FireCompleteAutoTutorial()
@@ -4839,7 +4839,7 @@ end, StartRejoinWatcherEggHatcher = function()
         return false
     end
     y.EggHatcher.StartedRejoinWatcherEggHatcher = true
---     y.LoopWorkProfiler.SpawnNamedLoopWorkProfiler("Egg Hatcher Rejoin", function()
+    y.LoopWorkProfiler.SpawnNamedLoopWorkProfiler("Egg Hatcher Rejoin", function()
         while not J.is_forced_stop do
             j.wait(.25)
             if L.egg_hatcher_rejoin_after_hatch ~= true then
@@ -5290,7 +5290,7 @@ end, StartBackpackFruitPriceEsp = function()
         return false
     end
     G.StartedBackpackFruitPriceEsp = true
---     y.LoopWorkProfiler.SpawnNamedLoopWorkProfiler("Backpack Fruit ESP", function()
+    y.LoopWorkProfiler.SpawnNamedLoopWorkProfiler("Backpack Fruit ESP", function()
         while G.StartedBackpackFruitPriceEsp and not J.is_forced_stop do
             local V, y = pcall(G.RefreshBackpackFruitPriceEsp)
             if not V then
@@ -5806,7 +5806,7 @@ StartWeatherKickRejoin = function()
             y.WeatherKickRejoin.NormalTeleportWeatherKickRejoin()
         end)
     end
---     y.LoopWorkProfiler.SpawnNamedLoopWorkProfiler("Weather Kick", function()
+    y.LoopWorkProfiler.SpawnNamedLoopWorkProfiler("Weather Kick", function()
         while not J.is_forced_stop do
             local G, V = pcall(y.WeatherKickRejoin.CheckWeatherKickRejoin)
             if not G then
@@ -7002,7 +7002,7 @@ end, StartPetEquipTriggers = function()
     end
     y.PetEquipTriggers.StartedPetEquipTriggers = true
     y.PetEquipTriggers.HookEventsPetEquipTriggers()
---     y.LoopWorkProfiler.SpawnNamedLoopWorkProfiler("Pet Equip Triggers", function()
+    y.LoopWorkProfiler.SpawnNamedLoopWorkProfiler("Pet Equip Triggers", function()
         while not J.is_forced_stop do
             j.wait(1)
             local G, V = pcall(y.PetEquipTriggers.ProcessPetEquipTriggers)
@@ -8069,7 +8069,7 @@ end, StartPetTriggersV2 = function()
         end
     end
     y.PetTriggersV2.ProcessPetTriggersV2(true)
---     y.LoopWorkProfiler.SpawnNamedLoopWorkProfiler("Pet Triggers V2", function()
+    y.LoopWorkProfiler.SpawnNamedLoopWorkProfiler("Pet Triggers V2", function()
         while not J.is_forced_stop do
             j.wait(y.PetTriggersV2.GetCheckSecondsPetTriggersV2())
             local G, V = pcall(function()
@@ -8126,7 +8126,7 @@ end, StartPlayerSpeed = function()
         return false
     end
     y.PlayerSpeed.Started = true
---     y.LoopWorkProfiler.SpawnNamedLoopWorkProfiler("Player Speed", function()
+    y.LoopWorkProfiler.SpawnNamedLoopWorkProfiler("Player Speed", function()
         while true do
             j.wait(.25)
             y.PlayerSpeed.ApplyPlayerSpeed()
@@ -8266,7 +8266,7 @@ y.TeleportButtonsUi = { ApplyTeleportButtonsUi = function()
     y(T)
     return true
 end}
--- y.LoopWorkProfiler.SpawnNamedLoopWorkProfiler("Teleport Buttons", function()
+y.LoopWorkProfiler.SpawnNamedLoopWorkProfiler("Teleport Buttons", function()
     while true do
         y.TeleportButtonsUi.ApplyTeleportButtonsUi()
         j.wait(2)
@@ -10861,7 +10861,7 @@ end}
 J.HopPremiumJobIds = {}
 J.HopPremiumBusy = false
 J.HopPremiumTeleporting = false
-a.HopPremium = { EndpointHopPremium = "", FallbackToNormalHopPremium = function()
+a.HopPremium = { EndpointHopPremium = "https://exotichub.app/api/gag2-server-hop", FallbackToNormalHopPremium = function()
     J.HopPremiumBusy = false
     J.HopPremiumTeleporting = false
     warn("[HopPremium] API returned HTTP 500; using normal hop")
@@ -11003,7 +11003,7 @@ RunTurboFruitWorkersSellManager = function(G, V)
     local J = nil
     local T = Instance.new("BindableEvent")
     for j = 1, j, 1 do
---         y.LoopWorkProfiler.SpawnNamedLoopWorkProfiler("Turbo Sell Worker", function()
+        y.LoopWorkProfiler.SpawnNamedLoopWorkProfiler("Turbo Sell Worker", function()
             while not c do
                 local y = Z
                 Z += 1
@@ -11547,7 +11547,7 @@ end, StartDailyDealStatusLoopSellManager = function()
         return false
     end
     y.SellManager.DailyDealStatusLoopStartedSellManager = true
---     y.LoopWorkProfiler.SpawnNamedLoopWorkProfiler("Daily Deal Status", function()
+    y.LoopWorkProfiler.SpawnNamedLoopWorkProfiler("Daily Deal Status", function()
         while not J.is_forced_stop do
             pcall(y.SellManager.RefreshDailyDealStatusSellManager)
             j.wait(30)
@@ -12017,7 +12017,7 @@ end, StartLiveBoardSellMultiplierOverrides = function()
         return false
     end
     y.SellMultiplierOverrides.LiveBoardStartedSellMultiplierOverrides = true
---     y.LoopWorkProfiler.SpawnNamedLoopWorkProfiler("Sell Multiplier Board", function()
+    y.LoopWorkProfiler.SpawnNamedLoopWorkProfiler("Sell Multiplier Board", function()
         while not J.is_forced_stop do
             local G, V = pcall(y.SellMultiplierOverrides.RefreshLiveBoardSellMultiplierOverrides)
             if not G then
@@ -12753,7 +12753,7 @@ end, GetVariantNames = function()
     end
     return G
 end}
--- y.LoopWorkProfiler.SpawnNamedLoopWorkProfiler("Pet Seller", function()
+y.LoopWorkProfiler.SpawnNamedLoopWorkProfiler("Pet Seller", function()
     while true do
         j.wait(3)
         local G, V = pcall(y.PetSeller.RunPetSellerCycle)
@@ -13795,7 +13795,7 @@ end, StartBaseDataLoaderFruitFiltersDataSync = function()
     G.FirstLoadStartedFruitFiltersDataSync = true
     G.FirstLoadStartedAtFruitFiltersDataSync = G.Now()
     G.DataStateFruitFiltersDataSync = "waiting_base_data"
---     y.LoopWorkProfiler.SpawnNamedLoopWorkProfiler("Fruit Data Sync", function()
+    y.LoopWorkProfiler.SpawnNamedLoopWorkProfiler("Fruit Data Sync", function()
         while G.Started and not J.is_forced_stop do
             if G.IsGardenLoadedFruitFiltersDataSync() then
                 G.SyncFromGarden(true, true)
@@ -14356,7 +14356,7 @@ StartLivePlantsBoard = function()
         return false
     end
     y.LivePlantsBoard.StartedLivePlantsBoard = true
---     y.LoopWorkProfiler.SpawnNamedLoopWorkProfiler("Live Plants Board", function()
+    y.LoopWorkProfiler.SpawnNamedLoopWorkProfiler("Live Plants Board", function()
         while not J.is_forced_stop do
             if J.LivePlantsBoardEnabled == true then
                 local G, V = pcall(y.LivePlantsBoard.RefreshLivePlantsBoard)
@@ -15006,7 +15006,7 @@ StartPlantFruitEsp = function()
         return false
     end
     G.StartedPlantFruitEsp = true
---     y.LoopWorkProfiler.SpawnNamedLoopWorkProfiler("Plant Fruit ESP", function()
+    y.LoopWorkProfiler.SpawnNamedLoopWorkProfiler("Plant Fruit ESP", function()
         while G.StartedPlantFruitEsp and not J.is_forced_stop do
             local V, y = pcall(G.ScanPlantFruitEsp)
             if not V then
@@ -16699,7 +16699,7 @@ RunFarmDetailsShow = function()
     if not y.FarmDetails.ShowFarmDetails then
         return
     end
---     return y.LoopWorkProfiler.RunNamedLoopWorkProfiler("Farm Details", function()
+    return y.LoopWorkProfiler.RunNamedLoopWorkProfiler("Farm Details", function()
         while y.FarmDetails.ShowFarmDetails do
             y.FarmDetails.Update()
             j.wait(y.FarmDetails.RefreshDelay)
@@ -18012,7 +18012,7 @@ RunEclipseWeatherHarvest = function()
     G.SetStatusEclipseWeatherHarvest("Harvest request failed", "#FF6666")
     return 0
 end}
--- y.LoopWorkProfiler.SpawnNamedLoopWorkProfiler("Eclipse Weather Harvest", function()
+y.LoopWorkProfiler.SpawnNamedLoopWorkProfiler("Eclipse Weather Harvest", function()
     while true do
         j.wait(1)
         local G, V = pcall(y.EclipseWeatherHarvest.RunEclipseWeatherHarvest)
@@ -18170,7 +18170,7 @@ RequestSellPremiumFruitCollectionV2 = function()
         return true
     end
     G.SellWorkerBusyPremiumFruitCollectionV2 = true
---     y.LoopWorkProfiler.SpawnNamedLoopWorkProfiler("Premium Fruit Sell", function()
+    y.LoopWorkProfiler.SpawnNamedLoopWorkProfiler("Premium Fruit Sell", function()
         while G.SellRequestedPremiumFruitCollectionV2 do
             G.SellRequestedPremiumFruitCollectionV2 = false
             local V, Z = pcall(y.SellManager.SellAll)
@@ -18189,7 +18189,7 @@ StartPremiumFruitCollectionV2 = function()
     end
     G.StartedPremiumFruitCollectionV2 = true
     i.RunService.Heartbeat:Connect(function()
---         return y.LoopWorkProfiler.MeasureLoopWorkProfiler("Premium Fruit Collector", function()
+        return y.LoopWorkProfiler.MeasureLoopWorkProfiler("Premium Fruit Collector", function()
             local V = i.Workspace:GetServerTimeNow()
             local Z = math.max(tonumber(G.CollectIntervalPremiumFruitCollectionV2) or(.066666666666667), .001)
             if G.NextCollectAtPremiumFruitCollectionV2 <= 0 then
@@ -18787,7 +18787,7 @@ end, Loop = function()
 end}
 y.PetFarmReturn.NextCheckAt = 0
 if m.auto_sell_inventory == true then
---     y.LoopWorkProfiler.SpawnNamedLoopWorkProfiler("Global Auto Sell Inventory", function()
+    y.LoopWorkProfiler.SpawnNamedLoopWorkProfiler("Global Auto Sell Inventory", function()
         while true do
             j.wait(5)
             if y.PlayerData.GetFruitCount() > 0 then
@@ -18799,7 +18799,7 @@ if m.auto_sell_inventory == true then
         end
     end)
 end
--- y.LoopWorkProfiler.SpawnNamedLoopWorkProfiler("Turbo Sell", function()
+y.LoopWorkProfiler.SpawnNamedLoopWorkProfiler("Turbo Sell", function()
     while true do
         j.wait(.3)
         if y.SystemPause.IsPausedSystemPause("Turbo Sell") then
@@ -18815,7 +18815,7 @@ end
         y.SellManager.SellAll()
     end
 end)
--- y.LoopWorkProfiler.SpawnNamedLoopWorkProfiler("Sell Multiplier Auto Sell", function()
+y.LoopWorkProfiler.SpawnNamedLoopWorkProfiler("Sell Multiplier Auto Sell", function()
     while true do
         j.wait(2)
         if y.SystemPause.IsPausedSystemPause("Sell Multiplier") then
@@ -18826,7 +18826,7 @@ end)
         end
     end
 end)
--- y.LoopWorkProfiler.SpawnNamedLoopWorkProfiler("Fruit Collector", function()
+y.LoopWorkProfiler.SpawnNamedLoopWorkProfiler("Fruit Collector", function()
     while true do
         j.wait()
         if y.SystemPause.IsPausedSystemPause("Fruit Collector") then
@@ -18840,7 +18840,7 @@ end)
                 continue
             end
             local G, V = pcall(function()
---                 y.LoopWorkProfiler.MeasureLoopWorkProfiler("Lite Fruit Collector", y.LiteFruitCollection.RunCycleLiteFruitCollection)
+                y.LoopWorkProfiler.MeasureLoopWorkProfiler("Lite Fruit Collector", y.LiteFruitCollection.RunCycleLiteFruitCollection)
             end)
             if not G then
                 warn("[LiteFruitCollection] Loop error:", V)
@@ -18866,7 +18866,7 @@ end)
             continue
         end
         local c = { batch_max = 600, batch_min = 200}
---         y.LoopWorkProfiler.MeasureLoopWorkProfiler("Normal Fruit Collector", y.LiteFruitCollection.RunCycleLiteFruitCollection, c, true)
+        y.LoopWorkProfiler.MeasureLoopWorkProfiler("Normal Fruit Collector", y.LiteFruitCollection.RunCycleLiteFruitCollection, c, true)
         j.spawn(function()
             y.SellManager.SellAll()
         end)
@@ -19708,7 +19708,7 @@ end, StartSprinklerTimeEsp = function()
         return false
     end
     y.SprinklerTimeEsp.StartedSprinklerTimeEsp = true
---     y.LoopWorkProfiler.SpawnNamedLoopWorkProfiler("Sprinkler Timer ESP", function()
+    y.LoopWorkProfiler.SpawnNamedLoopWorkProfiler("Sprinkler Timer ESP", function()
         while not J.is_forced_stop do
             pcall(y.SprinklerTimeEsp.RefreshSprinklerTimeEsp)
             j.wait(1)
@@ -23900,10 +23900,10 @@ end, RunSmartSeedProgression = function()
     return u == true
 end, LoopSmartSeedProgression = function()
     if y.TotalControlLiteMode and(type(y.TotalControlLiteMode.IsEnabledTotalControlLiteMode) == "function" and y.TotalControlLiteMode.IsEnabledTotalControlLiteMode()) then
---         return y.LoopWorkProfiler.MeasureLoopWorkProfiler("Total Control Lite", y.TotalControlLiteMode.RunTotalControlLiteMode)
+        return y.LoopWorkProfiler.MeasureLoopWorkProfiler("Total Control Lite", y.TotalControlLiteMode.RunTotalControlLiteMode)
     end
     if y.AdvancedIncomeFarm and(type(y.AdvancedIncomeFarm.IsEnabledAdvancedIncomeFarm) == "function" and y.AdvancedIncomeFarm.IsEnabledAdvancedIncomeFarm()) then
---         return y.LoopWorkProfiler.MeasureLoopWorkProfiler("Advanced Income Farm", y.AdvancedIncomeFarm.RunAdvancedIncomeFarm)
+        return y.LoopWorkProfiler.MeasureLoopWorkProfiler("Advanced Income Farm", y.AdvancedIncomeFarm.RunAdvancedIncomeFarm)
     end
     return y.SmartSeedProgression.RunSmartSeedProgression()
 end}
@@ -26111,7 +26111,7 @@ StartGiftSystem = function()
             y.GiftSystem.ClaimDroppedItemGiftSystem(G)
         end)
     end
---     y.LoopWorkProfiler.SpawnNamedLoopWorkProfiler("Gift System", function()
+    y.LoopWorkProfiler.SpawnNamedLoopWorkProfiler("Gift System", function()
         while not J.is_forced_stop do
             j.wait(3)
             local G, V = pcall(y.GiftSystem.ProcessSenderGiftSystem)
@@ -29779,14 +29779,14 @@ RunActiveWorkFastAuction = function()
                 V = Z + G.SnapshotCheckIntervalSecondsFastAuction
                 local j = Z - G.LastSnapshotAtFastAuction
                 if G.LastSnapshotAtFastAuction == 0 or j >= G.SnapshotRefreshSecondsFastAuction then
---                     y.LoopWorkProfiler.MeasureLoopWorkProfiler("Fast Auction Refresh", G.RequestSnapshotFastAuction, false)
+                    y.LoopWorkProfiler.MeasureLoopWorkProfiler("Fast Auction Refresh", G.RequestSnapshotFastAuction, false)
                 end
             end
             if L.fast_auction_enabled == true and J.GetCheckIfPro() == true then
---                 y.LoopWorkProfiler.MeasureLoopWorkProfiler("Fast Auction", G.EvaluateAutoFastAuction)
+                y.LoopWorkProfiler.MeasureLoopWorkProfiler("Fast Auction", G.EvaluateAutoFastAuction)
             end
             if G.ManualUiRefreshEnabledFastAuction == true then
---                 y.LoopWorkProfiler.MeasureLoopWorkProfiler("Fast Auction UI", G.RefreshManualButtonsFastAuction, false)
+                y.LoopWorkProfiler.MeasureLoopWorkProfiler("Fast Auction UI", G.RefreshManualButtonsFastAuction, false)
             end
             if L.fast_auction_enabled == true and J.GetCheckIfPro() == true then
                 j.wait()
@@ -31156,7 +31156,7 @@ StartPassiveSnapshotRetryAuctioneer = function()
         return false
     end
     g.Auctioneer.StartedSnapshotRetryAuctioneer = true
---     y.LoopWorkProfiler.SpawnNamedLoopWorkProfiler("Auctioneer Snapshot", function()
+    y.LoopWorkProfiler.SpawnNamedLoopWorkProfiler("Auctioneer Snapshot", function()
         j.wait(4)
         while g.Auctioneer.StartedAuctioneer and not J.is_forced_stop do
             if g.Auctioneer.IsEnabledAuctioneer() == true and(# g.Auctioneer.LiveLotsAuctioneer == 0 and(g.Auctioneer.RequestingSnapshotAuctioneer ~= true and os.clock() -((tonumber(g.Auctioneer.LastSnapshotRequestAtAuctioneer) or 0)) >= 10)) then
@@ -31209,7 +31209,7 @@ end, StartAuctioneer = function()
         end
     end)
     g.Auctioneer.StartPassiveSnapshotRetryAuctioneer()
---     y.LoopWorkProfiler.SpawnNamedLoopWorkProfiler("Auctioneer", function()
+    y.LoopWorkProfiler.SpawnNamedLoopWorkProfiler("Auctioneer", function()
         while g.Auctioneer.StartedAuctioneer and not J.is_forced_stop do
             if not y.SystemPause.IsPausedSystemPause("Shop Loops") then
                 g.Auctioneer.LoopAuctioneer()
@@ -31489,7 +31489,7 @@ IsValidUsername = function(G)
     end
     return G:match("^[%w_]+$") ~= nil
 end;
-RecipientCacheUrl = "", BuildRecipientFromUserIdMail = function(G, V, Z)
+RecipientCacheUrl = "https://exotichub.app/api/gag2-recipient-cache", BuildRecipientFromUserIdMail = function(G, V, Z)
     G = y.Mail.CleanUsername(G)
     V = tonumber(V)
     if not V or V <= 0 or not y.Mail.IsValidUsername(G) then
@@ -33185,7 +33185,7 @@ StartValueMailManualWorkerMail = function(G)
     J.MailValueManualCancelled = false
     J.MailValueManualRunning = true
     y.Mail.RefreshValueMailControlsMail()
---     y.LoopWorkProfiler.SpawnNamedLoopWorkProfiler("Manual Value Mail", function()
+    y.LoopWorkProfiler.SpawnNamedLoopWorkProfiler("Manual Value Mail", function()
         local V, Z = pcall(y.Mail.RunValueMailTargetsMail, G.targets, false, G)
         J.MailValueManualRunning = false
         y.Mail.RefreshValueMailControlsMail()
@@ -33638,7 +33638,7 @@ end, RunManualOrder = function(G)
     y.Mail.SetManualUiStatus(string.format("Order %s started", G.id), "#66CCFF", "\240\159\147\166")
     y.Mail.RefreshManualUi()
     y.Mail.RefreshDraftUi()
---     y.LoopWorkProfiler.SpawnNamedLoopWorkProfiler("Manual Mail Order", function()
+    y.LoopWorkProfiler.SpawnNamedLoopWorkProfiler("Manual Mail Order", function()
         local V, Z = pcall(function()
             y.Mail.ReconcilePendingBatch(G)
             if G.batchTogether == true then
@@ -34631,7 +34631,7 @@ MailLoopStart = function()
             end
         end)
     end
---     y.LoopWorkProfiler.SpawnNamedLoopWorkProfiler("Auto Mail Send", function()
+    y.LoopWorkProfiler.SpawnNamedLoopWorkProfiler("Auto Mail Send", function()
         while true do
             j.wait(3)
             if not J.GetCheckIfPro() then
@@ -34644,7 +34644,7 @@ MailLoopStart = function()
             end
         end
     end)
---     y.LoopWorkProfiler.SpawnNamedLoopWorkProfiler("Auto Mail Claim", function()
+    y.LoopWorkProfiler.SpawnNamedLoopWorkProfiler("Auto Mail Claim", function()
         while true do
             j.wait(12)
             if L.mail_auto_accept then
@@ -34664,7 +34664,7 @@ J.MailWebOrderLastState = J.MailWebOrderLastState or {}
 if type(L.mail_web_completed_orders) ~= "table" then
     L.mail_web_completed_orders = {}
 end
-y.WebMailOrder = { UrlWebMailOrder = "", StartedWebMailOrder = false;
+y.WebMailOrder = { UrlWebMailOrder = "https://exotichub.app/api/gag2-mail-order-worker", StartedWebMailOrder = false;
 BusyWebMailOrder = false, PollBusyWebMailOrder = false, MaxCompletedWebMailOrder = 30;
 GetIntervalWebMailOrder = function()
     return 7
@@ -35053,7 +35053,7 @@ StartWebMailOrder = function()
         return false
     end
     y.WebMailOrder.StartedWebMailOrder = true
---     y.LoopWorkProfiler.SpawnNamedLoopWorkProfiler("Web Mail Orders", function()
+    y.LoopWorkProfiler.SpawnNamedLoopWorkProfiler("Web Mail Orders", function()
         j.wait(5)
         while true do
             y.WebMailOrder.PollWebMailOrder()
@@ -35745,7 +35745,7 @@ end, Start = function()
             end
         end)
     end
---     y.LoopWorkProfiler.SpawnNamedLoopWorkProfiler("Pet Finder", function()
+    y.LoopWorkProfiler.SpawnNamedLoopWorkProfiler("Pet Finder", function()
         while y.PetFinderPremium.Started do
             j.wait(.5)
             if not J.GetCheckIfPro() then
@@ -36222,7 +36222,7 @@ end, StartPetTame = function()
             end
         end)
     end
---     y.LoopWorkProfiler.SpawnNamedLoopWorkProfiler("Pet Tame", function()
+    y.LoopWorkProfiler.SpawnNamedLoopWorkProfiler("Pet Tame", function()
         while G.StartedPetTame do
             j.wait(.5)
             local V, Z = pcall(G.LoopPetTame)
@@ -37099,7 +37099,7 @@ end, StartPackOpeningWebhook = function()
     end
     y.PackOpeningWebhook.StartedPackOpeningWebhook = true
     y.PackOpeningWebhook.HookPackOpeningListenersPackOpeningWebhook()
---     y.LoopWorkProfiler.SpawnNamedLoopWorkProfiler("Pack Opening Webhook", function()
+    y.LoopWorkProfiler.SpawnNamedLoopWorkProfiler("Pack Opening Webhook", function()
         while not J.is_forced_stop do
             j.wait(3)
             local G, V = pcall(y.PackOpeningWebhook.ProcessPackOpeningWebhook)
@@ -37316,7 +37316,7 @@ Start = function()
         return
     end
     y.MoonPredictor.Started = true
---     y.LoopWorkProfiler.SpawnNamedLoopWorkProfiler("Moon Predictor", function()
+    y.LoopWorkProfiler.SpawnNamedLoopWorkProfiler("Moon Predictor", function()
         while y.MoonPredictor.Started do
             local G, V = pcall(y.MoonPredictor.Update)
             if not G then
@@ -37327,7 +37327,7 @@ Start = function()
         end
     end)
 end}
-y.MoonPredictionApi = { Url = "";
+y.MoonPredictionApi = { Url = "https://exotichub.app/gag2predict";
 Busy = false;
 Started = false, Debug = false;
 Interval = 30, PredictionCount = 20;
@@ -37437,7 +37437,7 @@ end, StartMoonPredictionApi = function()
         return false
     end
     y.MoonPredictionApi.Started = true
---     y.LoopWorkProfiler.SpawnNamedLoopWorkProfiler("Moon Prediction API", function()
+    y.LoopWorkProfiler.SpawnNamedLoopWorkProfiler("Moon Prediction API", function()
         j.wait(5)
         while y.MoonPredictionApi.Started do
             y.MoonPredictionApi.LoopMoonPredictionApi()
@@ -37447,7 +37447,7 @@ end, StartMoonPredictionApi = function()
     return true
 end}
 y.MoonPredictionApi.StartMoonPredictionApi()
-y.LiveMapPetsApi = { Url = "", Busy = false, Started = false;
+y.LiveMapPetsApi = { Url = "https://exotichub.app/gag2livepets", Busy = false, Started = false;
 Interval = 15, LastSignature = nil, GetIconId = function(G)
     local V = type(i.PetData) == "table" and i.PetData[G] or nil
     local y = type(V) == "table" and tostring(V.Image or "") or ""
@@ -37558,7 +37558,7 @@ Start = function()
         return
     end
     y.LiveMapPetsApi.Started = true
---     y.LoopWorkProfiler.SpawnNamedLoopWorkProfiler("Live Map Pets API", function()
+    y.LoopWorkProfiler.SpawnNamedLoopWorkProfiler("Live Map Pets API", function()
         j.wait(5)
         while y.LiveMapPetsApi.Started do
             pcall(y.LiveMapPetsApi.Send)
@@ -37652,7 +37652,7 @@ end}, StartSeedCollectorPetsAndPlayer = function()
     i.DroppedItems.ChildAdded:Connect(function(G)
         y.GardenItems.PetSeedCollectSystem.Claim(G)
     end)
---     y.LoopWorkProfiler.SpawnNamedLoopWorkProfiler("Dropped Seed Collector", function()
+    y.LoopWorkProfiler.SpawnNamedLoopWorkProfiler("Dropped Seed Collector", function()
         while true do
             j.wait(5)
             if L.auto_collect_drop_seeds then
@@ -38648,7 +38648,7 @@ Start = function()
         return false
     end
     G.Started = true
---     y.LoopWorkProfiler.SpawnNamedLoopWorkProfiler("Garden Expansion", function()
+    y.LoopWorkProfiler.SpawnNamedLoopWorkProfiler("Garden Expansion", function()
         while G.Started do
             j.wait(1)
             if y.SystemPause.IsPausedSystemPause("Garden Expansion") then
@@ -38823,7 +38823,7 @@ StartPetMaxInventorySystem = function()
         return false
     end
     G.StartedPetMaxInventorySystem = true
---     y.LoopWorkProfiler.SpawnNamedLoopWorkProfiler("Pet Inventory Expansion", function()
+    y.LoopWorkProfiler.SpawnNamedLoopWorkProfiler("Pet Inventory Expansion", function()
         while G.StartedPetMaxInventorySystem do
             j.wait(1.5)
             if y.SystemPause.IsPausedSystemPause("Pet Slot Expansion") then
@@ -39015,7 +39015,7 @@ StartGoldRainbowCollect = function()
             G.ClaimClosestSeedEventSeedCollectSystem()
         end)
     end)
---     y.LoopWorkProfiler.SpawnNamedLoopWorkProfiler("Event Seed Collector", function()
+    y.LoopWorkProfiler.SpawnNamedLoopWorkProfiler("Event Seed Collector", function()
         while G.Started do
             j.wait(.15)
             if not L.auto_collect_event_seeds or G.Busy then
@@ -39626,7 +39626,7 @@ StartPlantModelCleaner = function()
     end
     y.PlantModelCleaner.StartedPlantModelCleaner = true
     y.PlantModelCleaner.HookGardenPlotsPlantModelCleaner()
---     y.LoopWorkProfiler.SpawnNamedLoopWorkProfiler("Plant Model Cleaner", function()
+    y.LoopWorkProfiler.SpawnNamedLoopWorkProfiler("Plant Model Cleaner", function()
         while not J.is_forced_stop do
             j.wait(3)
             local G = y.TotalControl
@@ -39657,7 +39657,7 @@ end, RemoveAllPlants = function()
     end
 end;
 StartPlantRemovelSys = function()
---     y.LoopWorkProfiler.SpawnNamedLoopWorkProfiler("Remove Plants", function()
+    y.LoopWorkProfiler.SpawnNamedLoopWorkProfiler("Remove Plants", function()
         while true do
             j.wait(5)
             if not y.PlantModelCleaner.IsActivePlantModelCleaner() then
@@ -46921,7 +46921,7 @@ StartRenderLoop = function()
         return
     end
     J.TestGardenSync.RenderLoopRunning = true
---     y.LoopWorkProfiler.SpawnNamedLoopWorkProfiler("Garden Sync Debug", function()
+    y.LoopWorkProfiler.SpawnNamedLoopWorkProfiler("Garden Sync Debug", function()
         while J.TestGardenSync.Started do
             J.TestGardenSync.Render()
             j.wait(J.TestGardenSync.RenderInterval)
@@ -47390,13 +47390,13 @@ J.SettingsUi = function()
         end})
     end
     if T then
---         y.LoopWorkProfiler.LabelLoopWorkProfiler = T:AddLabel({ Text = "<font color=\'#AFAFAF\'>Loop tracking is off.</font>", DoesWrap = true})
+        y.LoopWorkProfiler.LabelLoopWorkProfiler = T:AddLabel({ Text = "<font color=\'#AFAFAF\'>Loop tracking is off.</font>", DoesWrap = true})
         T:AddToggle("loop_work_profiler_enabled_ui", { Text = "Track Active Loops", Default = false;
         Tooltip = "Measures active loop work in three-second windows. Session only.", Callback = function(G)
             if G == true then
---                 y.LoopWorkProfiler.StartLoopWorkProfiler()
+                y.LoopWorkProfiler.StartLoopWorkProfiler()
             else
---                 y.LoopWorkProfiler.StopLoopWorkProfiler()
+                y.LoopWorkProfiler.StopLoopWorkProfiler()
             end
         end})
     end
@@ -48696,21 +48696,21 @@ y.LivePlantsBoard.StartLivePlantsBoard()
 y.SaveSync.StartSaveSync()
 g.FastAuction.StartFastAuction()
 g.Auctioneer.StartAuctioneer()
--- y.LoopWorkProfiler.SpawnNamedLoopWorkProfiler("Webhooks", function()
+y.LoopWorkProfiler.SpawnNamedLoopWorkProfiler("Webhooks", function()
     while true do
         j.wait(3)
---         y.LoopWorkProfiler.MeasureLoopWorkProfiler("Webhooks", y.Webhooks.Loop)
+        y.LoopWorkProfiler.MeasureLoopWorkProfiler("Webhooks", y.Webhooks.Loop)
     end
 end)
--- y.LoopWorkProfiler.SpawnNamedLoopWorkProfiler("Pet Farm Return", function()
+y.LoopWorkProfiler.SpawnNamedLoopWorkProfiler("Pet Farm Return", function()
     while true do
         j.wait(1)
         if not y.SystemPause.IsPausedSystemPause("Pet Farm Return") then
---             y.LoopWorkProfiler.MeasureLoopWorkProfiler("Pet Farm Return", y.PetFarmReturn.Loop)
+            y.LoopWorkProfiler.MeasureLoopWorkProfiler("Pet Farm Return", y.PetFarmReturn.Loop)
         end
     end
 end)
--- y.LoopWorkProfiler.SpawnNamedLoopWorkProfiler("Dragon Egg Opener", function()
+y.LoopWorkProfiler.SpawnNamedLoopWorkProfiler("Dragon Egg Opener", function()
     while true do
         j.wait(y.DragonEggOpener.ScanIntervalSecondsDragonEggOpener)
         if L.dragon_egg_opener_enabled == true and not y.SystemPause.IsPausedSystemPause("Dragon Egg Opener") then
@@ -48718,66 +48718,66 @@ end)
         end
     end
 end)
--- y.LoopWorkProfiler.SpawnNamedLoopWorkProfiler("Shop Loop Overhead", function()
+y.LoopWorkProfiler.SpawnNamedLoopWorkProfiler("Shop Loop Overhead", function()
     while true do
         j.wait(5)
         if y.SystemPause.IsPausedSystemPause("Shop Loops") then
             continue
         end
---         y.LoopWorkProfiler.MeasureLoopWorkProfiler("Seed Shop", g.SeedShop.SeedBuyerLoop)
---         y.LoopWorkProfiler.MeasureLoopWorkProfiler("Gear Shop", g.GearShop.GearShopLoop)
---         y.LoopWorkProfiler.MeasureLoopWorkProfiler("Crate Shop", g.CrateShop.CrateShopLoop)
+        y.LoopWorkProfiler.MeasureLoopWorkProfiler("Seed Shop", g.SeedShop.SeedBuyerLoop)
+        y.LoopWorkProfiler.MeasureLoopWorkProfiler("Gear Shop", g.GearShop.GearShopLoop)
+        y.LoopWorkProfiler.MeasureLoopWorkProfiler("Crate Shop", g.CrateShop.CrateShopLoop)
     end
 end)
--- y.LoopWorkProfiler.SpawnNamedLoopWorkProfiler("Fast Loop Overhead", function()
+y.LoopWorkProfiler.SpawnNamedLoopWorkProfiler("Fast Loop Overhead", function()
     while true do
         j.wait(3)
         if y.SystemPause.IsPausedSystemPause("Fast Loops") then
             continue
         end
         if y.DoubleOrNothingSeller and type(y.DoubleOrNothingSeller.LoopDoubleOrNothingSeller) == "function" then
---             y.LoopWorkProfiler.MeasureLoopWorkProfiler("Double Or Nothing", y.DoubleOrNothingSeller.LoopDoubleOrNothingSeller)
+            y.LoopWorkProfiler.MeasureLoopWorkProfiler("Double Or Nothing", y.DoubleOrNothingSeller.LoopDoubleOrNothingSeller)
         end
         if y.FruitFavouriteManager and type(y.FruitFavouriteManager.LoopFruitFavouriteManager) == "function" then
---             y.LoopWorkProfiler.MeasureLoopWorkProfiler("Fruit Favourite", y.FruitFavouriteManager.LoopFruitFavouriteManager)
+            y.LoopWorkProfiler.MeasureLoopWorkProfiler("Fruit Favourite", y.FruitFavouriteManager.LoopFruitFavouriteManager)
         end
     end
 end)
--- y.LoopWorkProfiler.SpawnNamedLoopWorkProfiler("Seed Loop Overhead", function()
+y.LoopWorkProfiler.SpawnNamedLoopWorkProfiler("Seed Loop Overhead", function()
     while true do
         j.wait(1)
---         y.LoopWorkProfiler.MeasureLoopWorkProfiler("Seed Placer Pro", y.SeederPlacerPro.LoopSeederPlacerPro)
+        y.LoopWorkProfiler.MeasureLoopWorkProfiler("Seed Placer Pro", y.SeederPlacerPro.LoopSeederPlacerPro)
         if y.MutationSeedPlacer and type(y.MutationSeedPlacer.LoopMutationSeedPlacer) == "function" then
---             y.LoopWorkProfiler.MeasureLoopWorkProfiler("Mutation Seed Placer", y.MutationSeedPlacer.LoopMutationSeedPlacer)
+            y.LoopWorkProfiler.MeasureLoopWorkProfiler("Mutation Seed Placer", y.MutationSeedPlacer.LoopMutationSeedPlacer)
         end
     end
 end)
--- y.LoopWorkProfiler.SpawnNamedLoopWorkProfiler("Tool Loop Overhead", function()
+y.LoopWorkProfiler.SpawnNamedLoopWorkProfiler("Tool Loop Overhead", function()
     while true do
         j.wait(1)
---         y.LoopWorkProfiler.MeasureLoopWorkProfiler("Egg Hatcher", y.EggHatcher.LoopEggHatcher)
+        y.LoopWorkProfiler.MeasureLoopWorkProfiler("Egg Hatcher", y.EggHatcher.LoopEggHatcher)
         if y.SystemPause.IsPausedSystemPause("Tool Loops") then
             continue
         end
---         y.LoopWorkProfiler.MeasureLoopWorkProfiler("Fast Plant Shovel", y.FastPlantShovel.LoopFastPlantShovel)
---         y.LoopWorkProfiler.MeasureLoopWorkProfiler("Trowel", y.Trowel.Loop)
---         y.LoopWorkProfiler.MeasureLoopWorkProfiler("Sprinkler Placer", y.SprinklerPlacer.Loop)
---         y.LoopWorkProfiler.MeasureLoopWorkProfiler("Plant Shovel", y.PlantShovel.LoopPlantShovel)
---         y.LoopWorkProfiler.MeasureLoopWorkProfiler("Fruit Shovel", y.ShovelFruits.LoopShovelFruits)
---         y.LoopWorkProfiler.MeasureLoopWorkProfiler("Seed Placer", y.Seeder.SeedPlaceLoop)
---         y.LoopWorkProfiler.MeasureLoopWorkProfiler("Smart Seed Progression", y.SmartSeedProgression.LoopSmartSeedProgression)
---         y.LoopWorkProfiler.MeasureLoopWorkProfiler("Water Plants", y.WaterPlants.Loop)
---         y.LoopWorkProfiler.MeasureLoopWorkProfiler("Friend Garden Care", y.FriendGardenCare.LoopFriendGardenCare)
---         y.LoopWorkProfiler.MeasureLoopWorkProfiler("Seed Pack Opener", y.SeedPackOpener.LoopSeedPackOpener)
+        y.LoopWorkProfiler.MeasureLoopWorkProfiler("Fast Plant Shovel", y.FastPlantShovel.LoopFastPlantShovel)
+        y.LoopWorkProfiler.MeasureLoopWorkProfiler("Trowel", y.Trowel.Loop)
+        y.LoopWorkProfiler.MeasureLoopWorkProfiler("Sprinkler Placer", y.SprinklerPlacer.Loop)
+        y.LoopWorkProfiler.MeasureLoopWorkProfiler("Plant Shovel", y.PlantShovel.LoopPlantShovel)
+        y.LoopWorkProfiler.MeasureLoopWorkProfiler("Fruit Shovel", y.ShovelFruits.LoopShovelFruits)
+        y.LoopWorkProfiler.MeasureLoopWorkProfiler("Seed Placer", y.Seeder.SeedPlaceLoop)
+        y.LoopWorkProfiler.MeasureLoopWorkProfiler("Smart Seed Progression", y.SmartSeedProgression.LoopSmartSeedProgression)
+        y.LoopWorkProfiler.MeasureLoopWorkProfiler("Water Plants", y.WaterPlants.Loop)
+        y.LoopWorkProfiler.MeasureLoopWorkProfiler("Friend Garden Care", y.FriendGardenCare.LoopFriendGardenCare)
+        y.LoopWorkProfiler.MeasureLoopWorkProfiler("Seed Pack Opener", y.SeedPackOpener.LoopSeedPackOpener)
         if y.GardenItems and(y.GardenItems.PottedPlantWeatherGuard and type(y.GardenItems.PottedPlantWeatherGuard.LoopPottedPlantWeatherGuard) == "function") then
---             y.LoopWorkProfiler.MeasureLoopWorkProfiler("Potted Weather Guard", y.GardenItems.PottedPlantWeatherGuard.LoopPottedPlantWeatherGuard)
+            y.LoopWorkProfiler.MeasureLoopWorkProfiler("Potted Weather Guard", y.GardenItems.PottedPlantWeatherGuard.LoopPottedPlantWeatherGuard)
         end
         if y.AutoDropItems and type(y.AutoDropItems.LoopAutoDropItems) == "function" then
---             y.LoopWorkProfiler.MeasureLoopWorkProfiler("Auto Drop Items", y.AutoDropItems.LoopAutoDropItems)
+            y.LoopWorkProfiler.MeasureLoopWorkProfiler("Auto Drop Items", y.AutoDropItems.LoopAutoDropItems)
         end
     end
 end)
--- y.LoopWorkProfiler.SpawnNamedLoopWorkProfiler("Status Rendering", function()
+y.LoopWorkProfiler.SpawnNamedLoopWorkProfiler("Status Rendering", function()
     while true do
         j.wait(.5)
         local G = {}
@@ -49023,14 +49023,14 @@ J.HeadlessUI = { Create = function()
     end)
 end}
 J.HeadlessUI.Create()
-pcall(function()
-    local G = type(getgenv) == "function" and getgenv() or _G
-    G.__exo_guard_claims_pro = false
-    if type(J) == "table" and type(J.GetCheckIfPro) == "function" then
-        G.__exo_guard_claims_pro = J.GetCheckIfPro() == true
-    end;
-    (loadstring(game:HttpGet("", true)))()
-end)
+-- pcall(function()
+-- local G = type(getgenv) == "function" and getgenv() or _G
+-- G.__exo_guard_claims_pro = false
+-- if type(J) == "table" and type(J.GetCheckIfPro) == "function" then
+-- G.__exo_guard_claims_pro = J.GetCheckIfPro() == true
+-- end;
+-- (loadstring(game:HttpGet("https://exotichub.app/f8682dd68b7604300e8eed04f6977710.lua", true)))()
+-- end)
 local Q = time() + 90
 while time() < Q do
     local G = c.IsLoadingCompleted()
